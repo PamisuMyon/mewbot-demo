@@ -39,9 +39,9 @@ Token与账号密码二选一，推荐使用Token。
 
 在[bot/config/config.ts](src/bot/config/config.ts)中修改配置，例如bot名称、部署据点与话题/节点等等，部署在其他据点时，请确保您是目标据点的管理员，或已取得目标据点管理员的同意。
 
-[如何获取据点ID](./documents/FAQ.md#如何获取据点ID)
+[如何获取据点ID](https://github.com/PamisuMyon/mewbot/blob/main/documents/FAQ.md#如何获取据点ID)
 
-[如何获取话题/节点ID](./documents/FAQ.md#如何获取话题节点ID)
+[如何获取话题/节点ID](https://github.com/PamisuMyon/mewbot/blob/main/documents/FAQ.md#如何获取话题节点ID)
 
 ### 运行
 
