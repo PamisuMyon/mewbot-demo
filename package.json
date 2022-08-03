@@ -1,0 +1,16 @@
+{
+  "name": "mewbot-demo",
+  "version": "1.0.0",
+  "description": "Demo of mewbot",
+  "type": "module",
+  "scripts": {
+    "bot": "node dist/bot/app.js",
+    "mock": "node dist/bot/mock.js"
+  },
+  "author": "Pamisu",
+  "license": "MIT",
+  "dependencies": {
+    "got": "^12.3.0",
+    "mewbot": "^1.0.0"
+  }
+}
