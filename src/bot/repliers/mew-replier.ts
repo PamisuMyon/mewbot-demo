@@ -1,6 +1,6 @@
 import { MessageCreateData, Node } from "mewbot";
 import { IBot } from "../ibot.js";
-import { ISubReplier, PrimaryReplier, ReplyAction, ReplyResult, SubReplyTestResult } from "./ireplier.js";
+import { SubReplier, PrimaryReplier, ReplyAction, ReplyResult, SubReplyTestResult } from "./replier.js";
 
 export class MewReplier extends PrimaryReplier {
     override type = 'mew';
@@ -11,7 +11,7 @@ export class MewReplier extends PrimaryReplier {
 
 }
 
-class NodeInfoSubReplier implements ISubReplier {
+class NodeInfoSubReplier implements SubReplier {
 
     protected _regex = /(查询)?据点(信息)? *　*(.*)/;
 
@@ -32,8 +32,13 @@ class NodeInfoSubReplier implements ISubReplier {
         if (info.data) {
             await bot.replyText(msg, this.beautifyNodeInfo(info.data));
         } else {
-            // if (info.error?.name) // TODO 从错误信息中判断据点是否存在
-            await bot.replyText(msg, '获取据点信息失败😭');
+            let hint: string;
+            if (info.error?.status == 404) {
+                hint = '据点不存在👀'
+            } else {
+                hint = '获取据点信息失败😭';
+            }
+            await bot.replyText(msg, hint);
         }
         return { action: ReplyAction.Replied };
     }

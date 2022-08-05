@@ -3,7 +3,7 @@ import got from "got";
 import { NetUtil } from "../commons/net-util.js";
 import { utils } from "../commons/utils.js";
 import { IBot } from "../ibot.js";
-import { ISubReplier, PrimaryReplier, ReplyAction, ReplyResult, SubReplyTestResult } from "./ireplier.js";
+import { SubReplier, PrimaryReplier, ReplyAction, ReplyResult, SubReplyTestResult } from "./replier.js";
 
 export class PictureReplier extends PrimaryReplier {
     
@@ -16,7 +16,7 @@ export class PictureReplier extends PrimaryReplier {
 
 }
 
-abstract class PictureSubReplier implements ISubReplier {
+abstract class PictureSubReplier implements SubReplier {
     
     protected _timeout = 8000;
     protected abstract _regex: RegExp;

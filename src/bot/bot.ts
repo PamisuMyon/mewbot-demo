@@ -1,4 +1,5 @@
 import { logger, MessageCreateData, MewClient, User } from "mewbot";
+import { Defender } from "./commons/defender.js";
 import { utils } from "./commons/utils.js";
 import { getAccount } from "./config/account.js";
 import config from "./config/config.js";
@@ -6,9 +7,10 @@ import { IBot } from "./ibot.js";
 import { ChatReplier } from "./repliers/chat-replier.js";
 import { CrashReplier } from "./repliers/crash-replier.js";
 import { DiceReplier } from "./repliers/dice-replier.js";
-import { IReplier, ReplyAction } from "./repliers/ireplier.js";
+import { BaseReplier, ReplyAction } from "./repliers/replier.js";
 import { MewReplier } from "./repliers/mew-replier.js";
 import { PictureReplier } from "./repliers/picture-replier.js";
+import { KudosReplier } from "./repliers/kudos-replier.js";
 
 export class Bot implements IBot {
     protected _client = new MewClient();
@@ -17,11 +19,13 @@ export class Bot implements IBot {
     protected _me!: User;
     protected _names!: Array<string>;
     protected _atRegex!: RegExp;
-    protected _repliers: Array<IReplier> = [
+    protected _defender!: Defender;
+    protected _repliers: Array<BaseReplier> = [
         new DiceReplier(),
         new MewReplier(),
         new CrashReplier(),
         new PictureReplier(),
+        new KudosReplier(),
         new ChatReplier(),
     ];
 
@@ -54,6 +58,13 @@ export class Bot implements IBot {
             return;
         }
         this.initNames();
+
+        // 初始化防御机制
+        this._defender = new Defender(config.defender.interval, config.defender.threshold);
+        await this._defender.init();
+
+        // 初始化所有回复器
+        this.initRepliers();
         
         // 订阅消息事件
         this._client.on('message_create', data => {
@@ -81,6 +92,15 @@ export class Bot implements IBot {
     }
 
     /**
+     * 初始化所有回复器
+     */
+    protected initRepliers() {
+        for (const replier of this._repliers) {
+            replier.init();
+        }
+    }
+
+    /**
      * 处理消息队列
      */
     protected processMessages() {
@@ -95,6 +115,13 @@ export class Bot implements IBot {
      * 处理单条消息
      */
     protected async doProcessMessage(msg: MessageCreateData) {
+        // 用户在屏蔽列表中，返回
+        if (!msg._user) return;
+        if (this._defender.isBlocked(msg._user.id)) {
+            logger.debug(`Message from blocked user: ${msg._user.name} @${msg._user.username}`);
+            return;
+        }
+
         // 判断是否符合回复条件
         if (msg._isDirect) {    // 私聊
             // 配置不回复私聊，返回
@@ -111,6 +138,7 @@ export class Bot implements IBot {
             msg.content = msg.content.replace(this._atRegex, '').trim();
             this._atRegex.lastIndex = 0;
         }
+
         // 执行回复
         for (const replier of this._repliers) {
             const result = await replier.reply(this, msg);
@@ -121,6 +149,9 @@ export class Bot implements IBot {
                 continue;
             if (result.action == ReplyAction.Replied) {
                 // ...额外处理逻辑
+                // 记录到Defender
+                this._defender.record(msg._user);
+                // 是否需要撤回
                 if (result.recall?.messageId) {
                     await utils.sleep(result.recall.delay);
                     await this.client.deleteMessage(result.recall.messageId);
@@ -130,22 +161,7 @@ export class Bot implements IBot {
         }
     }
 
-    /**
-     * 判断功能在话题（节点）中是否可用
-     * @param msg 
-     * @param type Replier type
-     */
-    async isReplierForbidden(msg: MessageCreateData, type: string, shouldReply = true): Promise<boolean> {
-        if (msg._isDirect) return false;
-        if (!Reflect.has(config.topics[msg.topic_id].repliers, type)) {
-            if (shouldReply) {
-                // 回复提示文本
-                await this.replyText(msg, utils.randomItem(config.hints.replierForbidden));
-            }
-            return true;
-        }
-        return false;
-    }
+
 
     protected getReplyTitle(msgToReply: MessageCreateData) {
         let title = ''

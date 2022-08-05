@@ -41,17 +41,48 @@ export default {
                 },
                 dice: {},
                 help: {},
+                kudos: {},
                 mew: {},
-                picture: {},
+                picture: {
+                    spam: {
+                        interval: 60000,
+                        threshold: 3,
+                        cooldown: 120000,
+                    }
+                },
             }
         },
-    } as any,
+    } as TopicsConfig,
+    // 提示文本
     hints: {
-        replierForbidden: [
+        replierUnavailable: [
             "对不起，本节点不支持这个功能😿"
         ],
         fallback: [
             "我不知道怎么跟你说，因为我只是一个机器人",
         ]
     },
+    // 防御机制，用来避免短时间内被频繁刷屏，例如两个bot互相回复陷入死循环
+    defender: {
+        interval: 1000,     // 连击生效间隔
+        threshold: 10,      // 防御连击阈值，达到此阈值时将对方加入屏蔽列表
+    },
 };
+
+export interface TopicsConfig {
+    [topicId: string]: TopicConfig;
+}
+
+export interface TopicConfig {
+    name: string;
+    repliers: { [type: string]: ReplierConfig };
+}
+
+export interface ReplierConfig {
+    [key: string]: any;
+    spam?: {
+        interval?: number;
+        threshold?: number;
+        cooldown?: number;
+    }
+}

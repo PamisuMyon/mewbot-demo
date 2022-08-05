@@ -8,8 +8,6 @@ export interface IBot {
 
     launch(): Promise<void>;
 
-    isReplierForbidden(msg: MessageCreateData, type: string, shouldReply?: boolean): Promise<boolean>;
-
     replyText(msgToReply: MessageCreateData, reply: string): Promise<Result<Message>>;
 
 }

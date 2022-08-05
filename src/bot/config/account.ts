@@ -5,7 +5,7 @@ const accountPath = './account.json';
 
 /*
 登录授权有两种方式，token或账密登录，推荐使用token
-请在resources/config/目录下创建account.json，内容格式：
+请在根目录下创建account.json，内容格式：
 {
     "token": "你的token",
     "username": "你的MEWID",

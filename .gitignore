@@ -109,4 +109,5 @@ dist
 
 dist/
 cache/
+storage/
 account.json

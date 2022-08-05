@@ -6,6 +6,8 @@ class MockBot extends Bot {
     
     override async replyText(msgToReply: MessageCreateData, reply: string) {
         logger.debug('Reply:' + reply);
+        if (msgToReply._user)
+            this._defender.record(msgToReply._user);
         return { data: { id: 'somefakeid' } as Message };
     }
 

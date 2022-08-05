@@ -2,10 +2,11 @@ import { MessageCreateData } from "mewbot";
 import { utils } from "../commons/utils.js";
 import config from "../config/config.js";
 import { IBot } from "../ibot.js";
-import { IReplier, ReplyAction, ReplyResult } from "./ireplier.js";
+import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
 
 
-export class ChatReplier implements IReplier {
+export class ChatReplier extends BaseReplier {
+
     type = 'chat';
 
     async reply(bot: IBot, msg: MessageCreateData): Promise<ReplyResult> {
@@ -13,10 +14,18 @@ export class ChatReplier implements IReplier {
             bot.replyText(msg, `你好，${msg._user?.name}`);
             return { action: ReplyAction.Replied };
         }            
-        if (await bot.isReplierForbidden(msg, this.type)) {
+        if (!await this.checkAvailable(bot, msg)) {
             return { action: ReplyAction.Replied };
         }
-        await bot.replyText(msg, utils.randomItem(config.hints.fallback));
+        let content: string;
+        
+        const r = msg.content.match(/🍅/g);
+        if (r) {
+            content = new Array(r.length + 1).join('🥕');
+        } else {
+            content = utils.randomItem(config.hints.fallback)
+        }
+        await bot.replyText(msg, content);
         return { action: ReplyAction.Replied };
     }
 

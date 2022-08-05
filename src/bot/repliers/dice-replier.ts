@@ -1,12 +1,12 @@
 import { MessageCreateData } from "mewbot";
 import { utils } from "../commons/utils.js";
 import { IBot } from "../ibot.js";
-import { IReplier, ReplyAction, ReplyResult } from "./ireplier.js";
+import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
 
 /**
  * 骰娘的本职工作
  */
-export class DiceReplier implements IReplier {
+export class DiceReplier extends BaseReplier {
 
     type = 'dice';
     isPromise = false;
@@ -28,9 +28,10 @@ export class DiceReplier implements IReplier {
         if (!this._regex.test(msg.content)) {
             return { action: ReplyAction.Pass };
         }
-        if (await bot.isReplierForbidden(msg, this.type)) {
+        if (!await this.checkAvailable(bot, msg)) {
             return { action: ReplyAction.Replied };
         }
+        
         const lines = msg.content.split('\n');
         const options = new Array<DiceOptions>();
         for (const line of lines) {

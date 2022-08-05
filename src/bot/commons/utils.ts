@@ -30,4 +30,13 @@ export class utils {
         });
     }
 
+    static getTimeCounterText(time: number): string {
+        if (time < 60) {
+            return time + '秒';
+        } else {
+            time = Math.ceil(time / 60);
+            return time + '分钟';
+        }
+    }
+    
 }

@@ -1,9 +1,9 @@
 import { MessageCreateData } from "mewbot";
 import { utils } from "../commons/utils.js";
 import { IBot } from "../ibot.js";
-import { IReplier, ReplyAction, ReplyResult } from "./ireplier.js";
+import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
 
-export class CrashReplier implements IReplier {
+export class CrashReplier extends BaseReplier {
     type = 'crash';
 
     protected _regex = /来点(闪退|崩溃) *　*(\d*)/
@@ -15,13 +15,20 @@ export class CrashReplier implements IReplier {
         if (!this._regex.test(msg.content)) {
             return { action: ReplyAction.Pass };
         }
-        if (await bot.isReplierForbidden(msg, this.type)) {
+        if (!await this.checkAvailable(bot, msg)) {
             return { action: ReplyAction.Replied };
         }
+
+        let defaultTimeout = 100;
+        const config = this.getConfig(msg.topic_id);
+        if (config && !isNaN(config.defaultTimeout)) {
+            defaultTimeout = config.defaultTimeout;
+        }
+
         const r = this._regex.exec(msg.content);
-        let timeout = utils.getNumber(r![2], 100);
+        let timeout = utils.getNumber(r![2], defaultTimeout);
         timeout = Math.max(timeout, 100);
-        console.log('timeout:' + timeout);
+        
         await bot.replyText(msg, 'iOS闪退测试中，请坐和放宽...');
         await utils.sleep(2000);
         const result = await bot.replyText(msg, '😺😸😹😻😼😽🙀😿😾');
