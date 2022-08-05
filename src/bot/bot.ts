@@ -1,4 +1,4 @@
-import { logger, MessageCreateData, MewClient, User } from "mewbot";
+import { logger, Message, MessageCreateData, MewClient, Result, User } from "mewbot";
 import { Defender } from "./commons/defender.js";
 import { utils } from "./commons/utils.js";
 import { getAccount } from "./config/account.js";
@@ -11,6 +11,7 @@ import { BaseReplier, ReplyAction } from "./repliers/replier.js";
 import { MewReplier } from "./repliers/mew-replier.js";
 import { PictureReplier } from "./repliers/picture-replier.js";
 import { KudosReplier } from "./repliers/kudos-replier.js";
+import { MaxContentLength } from "./constants.js";
 
 export class Bot implements IBot {
     protected _client = new MewClient();
@@ -161,8 +162,6 @@ export class Bot implements IBot {
         }
     }
 
-
-
     protected getReplyTitle(msgToReply: MessageCreateData) {
         let title = ''
         if (msgToReply._isDirect) return title;
@@ -181,7 +180,29 @@ export class Bot implements IBot {
 
     async replyText(msgToReply: MessageCreateData, reply: string) {
         reply = this.getReplyTitle(msgToReply) + reply;
-        return await this._client.sendTextMessage(msgToReply.topic_id, reply);
+        if (reply.length > MaxContentLength) {
+            const replies = new Array<string>();
+            while (reply.length != 0) {
+                replies.push(reply.slice(0, MaxContentLength))
+                reply = reply.slice(MaxContentLength, reply.length);
+            }
+            return await this.replyTexts(msgToReply, replies, false);
+        } else {
+            return await this._client.sendTextMessage(msgToReply.topic_id, reply);
+        }
+    }
+
+    async replyTexts(msgToReply: MessageCreateData, replies: string[], needTitle = true) {
+        let result: Result<Message> = { error: { name: 'UnknownError' } };
+        if (needTitle) {
+            replies[0] = this.getReplyTitle(msgToReply) + replies[0];
+        }
+        for (let i = 0; i < replies.length; i++) {
+            result = await this._client.sendTextMessage(msgToReply.topic_id, replies[i]);
+            if (i != replies.length - 1)
+                await utils.sleep(200);
+        }
+        return result;
     }
 
 }

@@ -10,4 +10,6 @@ export interface IBot {
 
     replyText(msgToReply: MessageCreateData, reply: string): Promise<Result<Message>>;
 
+    replyTexts(msgToReply: MessageCreateData, replies: string[], needTitle?: boolean): Promise<Result<Message>>;
+
 }
