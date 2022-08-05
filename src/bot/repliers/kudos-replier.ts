@@ -1,4 +1,5 @@
 import { AuthMode, MessageCreateData } from "mewbot";
+import { utils } from "../commons/utils.js";
 import { IBot } from "../ibot.js";
 import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
 
@@ -6,6 +7,12 @@ export class KudosReplier extends BaseReplier {
 
     type = 'kudos';
     protected _regex = /(给)?猫猫加油/;
+    protected _roles = [
+        '😸', '🤖', '🌰', '🐯', '🐶', 
+        '🐵', '🥵', '🍄', '👻', '🍔', 
+        '😎', '😈', '⭐', '🌝', '🐱‍👤',
+    ];
+    protected _effects = ['💥', '💦', '⚡', '✨', '🎉'];
 
     async reply(bot: IBot, msg: MessageCreateData): Promise<ReplyResult> {
         if (!msg.content) {
@@ -21,7 +28,7 @@ export class KudosReplier extends BaseReplier {
         const result = await this.addKudos(bot, 0);
         let reply: string;
         if (result.data) {
-            reply = `💪😸🤜💥${result.data.kudos}！`;
+            reply = `💪${utils.randomItem(this._roles)}🤜${utils.randomItem(this._effects)}${result.data.kudos}！`;
         } else {
             reply = '给猫猫加油失败😿';
         }
