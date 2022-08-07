@@ -1,4 +1,4 @@
-import { MessageCreateData } from "mewbot";
+import { Message } from "mewbot";
 import { utils } from "../commons/utils.js";
 import config from "../config/config.js";
 import { IBot } from "../ibot.js";
@@ -9,7 +9,7 @@ export class ChatReplier extends BaseReplier {
 
     type = 'chat';
 
-    async reply(bot: IBot, msg: MessageCreateData): Promise<ReplyResult> {
+    async reply(bot: IBot, msg: Message): Promise<ReplyResult> {
         if (!msg.content) {
             bot.replyText(msg, `你好，${msg._user?.name}`);
             return { action: ReplyAction.Replied };

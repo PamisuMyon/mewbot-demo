@@ -1,4 +1,4 @@
-import { MessageCreateData } from "mewbot";
+import { Message } from "mewbot";
 import { Spam } from "../commons/spam.js";
 import { utils } from "../commons/utils.js";
 import config from "../config/config.js";
@@ -49,7 +49,7 @@ export abstract class BaseReplier {
     /**
      * 判断功能在话题（节点）中是否可用
      */
-    protected async checkAvailable(bot: IBot, msg: MessageCreateData, shouldReply = true): Promise<boolean> {
+    protected async checkAvailable(bot: IBot, msg: Message, shouldReply = true): Promise<boolean> {
         const conf = this.getConfig(msg.topic_id);
         if (!conf) {
             if (shouldReply) {
@@ -75,14 +75,14 @@ export abstract class BaseReplier {
             spam.record(targetId);
     }
 
-    abstract reply(bot: IBot, msg: MessageCreateData): Promise<ReplyResult>;
+    abstract reply(bot: IBot, msg: Message): Promise<ReplyResult>;
 
 }
 
 export abstract class SubReplier {
-    abstract test(msg: MessageCreateData): Promise<SubReplyTestResult>;
+    abstract test(msg: Message): Promise<SubReplyTestResult>;
 
-    abstract reply(bot: IBot, msg: MessageCreateData, data?: any): Promise<ReplyResult>;
+    abstract reply(bot: IBot, msg: Message, data?: any): Promise<ReplyResult>;
 }
 
 export interface SubReplyTestResult {
@@ -98,7 +98,7 @@ export abstract class PrimaryReplier extends BaseReplier {
     protected _subRepliers!: Array<SubReplier>;
     protected _replierPickFunc = this.pick01;
 
-    async reply(bot: IBot, msg: MessageCreateData): Promise<ReplyResult> {
+    async reply(bot: IBot, msg: Message): Promise<ReplyResult> {
         if (!msg.content) {
             return { action: ReplyAction.Pass };
         }
@@ -142,7 +142,7 @@ export abstract class PrimaryReplier extends BaseReplier {
         return { action: ReplyAction.Pass };
     }
 
-    protected async pick01(msg: MessageCreateData) {
+    protected async pick01(msg: Message) {
         for (let i = 0; i < this._subRepliers.length; i++) {
             const t = await this._subRepliers[i].test(msg);
             if (t.confidence == 1) {
@@ -153,7 +153,7 @@ export abstract class PrimaryReplier extends BaseReplier {
         return;
     }
 
-    protected async pick(msg: MessageCreateData) {
+    protected async pick(msg: Message) {
         const tests = new Array<SubReplyTestResult>();
         for (let i = 0; i < this._subRepliers.length; i++) {
             const t = await this._subRepliers[i].test(msg);

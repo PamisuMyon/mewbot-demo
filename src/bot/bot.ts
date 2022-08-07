@@ -1,4 +1,4 @@
-import { logger, Message, MessageCreateData, MewClient, Result, User } from "mewbot";
+import { logger, Message, MewClient, Result, User } from "mewbot";
 import { Defender } from "./commons/defender.js";
 import { utils } from "./commons/utils.js";
 import { getAccount } from "./config/account.js";
@@ -16,7 +16,7 @@ import { MaxContentLength } from "./constants.js";
 export class Bot implements IBot {
     protected _client = new MewClient();
     get client(): MewClient { return this._client; }
-    protected _msgQueue = new Array<MessageCreateData>();
+    protected _msgQueue = new Array<Message>();
     protected _me!: User;
     protected _names!: Array<string>;
     protected _atRegex!: RegExp;
@@ -108,14 +108,14 @@ export class Bot implements IBot {
         if (this._msgQueue.length == 0) {
             return;
         }
-        const msg = this._msgQueue.shift() as MessageCreateData;
+        const msg = this._msgQueue.shift() as Message;
         (async ()=> this.doProcessMessage(msg))();
     }
 
     /**
      * 处理单条消息
      */
-    protected async doProcessMessage(msg: MessageCreateData) {
+    protected async doProcessMessage(msg: Message) {
         // 用户在屏蔽列表中，返回
         if (!msg._user) return;
         if (this._defender.isBlocked(msg._user.id)) {
@@ -162,7 +162,7 @@ export class Bot implements IBot {
         }
     }
 
-    protected getReplyTitle(msgToReply: MessageCreateData) {
+    protected getReplyTitle(msgToReply: Message) {
         let title = ''
         if (msgToReply._isDirect) return title;
         if (!msgToReply._user) return title;
@@ -178,7 +178,7 @@ export class Bot implements IBot {
         return `@${msgToReply._user.name} `;
     }
 
-    async replyText(msgToReply: MessageCreateData, reply: string) {
+    async replyText(msgToReply: Message, reply: string) {
         reply = this.getReplyTitle(msgToReply) + reply;
         if (reply.length > MaxContentLength) {
             const replies = new Array<string>();
@@ -192,7 +192,7 @@ export class Bot implements IBot {
         }
     }
 
-    async replyTexts(msgToReply: MessageCreateData, replies: string[], needTitle = true) {
+    async replyTexts(msgToReply: Message, replies: string[], needTitle = true) {
         let result: Result<Message> = { error: { name: 'UnknownError' } };
         if (needTitle) {
             replies[0] = this.getReplyTitle(msgToReply) + replies[0];

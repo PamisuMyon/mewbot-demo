@@ -1,4 +1,4 @@
-import { AuthMode, MessageCreateData } from "mewbot";
+import { AuthMode, Message } from "mewbot";
 import { utils } from "../commons/utils.js";
 import { IBot } from "../ibot.js";
 import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
@@ -14,7 +14,7 @@ export class KudosReplier extends BaseReplier {
     ];
     protected _effects = ['💥', '💦', '⚡', '✨', '🎉'];
 
-    async reply(bot: IBot, msg: MessageCreateData): Promise<ReplyResult> {
+    async reply(bot: IBot, msg: Message): Promise<ReplyResult> {
         if (!msg.content) {
             return { action: ReplyAction.Pass };
         }

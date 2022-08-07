@@ -1,4 +1,4 @@
-import { MessageCreateData } from "mewbot";
+import { Message } from "mewbot";
 import { utils } from "../commons/utils.js";
 import { IBot } from "../ibot.js";
 import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
@@ -8,7 +8,7 @@ export class CrashReplier extends BaseReplier {
 
     protected _regex = /来点(闪退|崩溃) *　*(\d*)/
 
-    async reply(bot: IBot, msg: MessageCreateData): Promise<ReplyResult> {
+    async reply(bot: IBot, msg: Message): Promise<ReplyResult> {
         if (!msg.content) {
             return { action: ReplyAction.Pass };
         }

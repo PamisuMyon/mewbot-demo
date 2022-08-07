@@ -1,9 +1,10 @@
-import { logger, LogLevel, MessageCreateData } from "mewbot";
+import { logger, LogLevel, Message } from "mewbot";
 import got from "got";
 import { NetUtil } from "../commons/net-util.js";
 import { utils } from "../commons/utils.js";
 import { IBot } from "../ibot.js";
 import { SubReplier, PrimaryReplier, ReplyAction, ReplyResult, SubReplyTestResult } from "./replier.js";
+import { FileUtil } from "../commons/file-util.js";
 
 export class PictureReplier extends PrimaryReplier {
     
@@ -25,12 +26,12 @@ abstract class PictureSubReplier implements SubReplier {
     protected abstract _downloadErrorHint: string;
     protected abstract _sendErrorHint: string;
 
-    async test(msg: MessageCreateData): Promise<SubReplyTestResult> {
+    async test(msg: Message): Promise<SubReplyTestResult> {
         const b = this._regex.test(msg.content as string);
         return { confidence: b? 1 : 0 };
     }
 
-    async reply(bot: IBot, msg: MessageCreateData, data?: any): Promise<ReplyResult> {
+    async reply(bot: IBot, msg: Message, data?: any): Promise<ReplyResult> {
         const hint = await bot.replyText(msg, this._downloadingHint);
         const file = await utils.randomItem(this._downloadFuncs)();
         let error;
@@ -38,6 +39,9 @@ abstract class PictureSubReplier implements SubReplier {
             const image = await bot.client.sendImageMessage(msg.topic_id, file);
             if (!image.data || !image.data.id) {
                 error = this._sendErrorHint;
+            } else {
+                // 删除缓存文件
+                await FileUtil.delete(file);
             }
         } else {
             error = this._downloadErrorHint;

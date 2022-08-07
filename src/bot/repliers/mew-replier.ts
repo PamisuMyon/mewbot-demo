@@ -1,4 +1,4 @@
-import { MessageCreateData, Node } from "mewbot";
+import { Message, Node } from "mewbot";
 import { IBot } from "../ibot.js";
 import { SubReplier, PrimaryReplier, ReplyAction, ReplyResult, SubReplyTestResult } from "./replier.js";
 
@@ -15,7 +15,7 @@ class NodeInfoSubReplier implements SubReplier {
 
     protected _regex = /(查询)?据点(信息)? *　*(.*)/;
 
-    async test(msg: MessageCreateData): Promise<SubReplyTestResult> {
+    async test(msg: Message): Promise<SubReplyTestResult> {
         const r = this._regex.exec(msg.content as string);
         if (r) {
             return { confidence: 1, data: r[3] };
@@ -23,7 +23,7 @@ class NodeInfoSubReplier implements SubReplier {
         return { confidence: 0 };
     }
 
-    async reply(bot: IBot, msg: MessageCreateData, data?: any): Promise<ReplyResult> {
+    async reply(bot: IBot, msg: Message, data?: any): Promise<ReplyResult> {
         if (!data) {
             await bot.replyText(msg, '指令输入错误，需要指定据点ID');
             return { action: ReplyAction.Replied };

@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import { promisify } from 'util';
 const writeFile = promisify(fs.writeFile);
 const readFile = promisify(fs.readFile);
+const unlink = promisify(fs.unlink);
 
 export class FileUtil {
 
@@ -28,4 +29,10 @@ export class FileUtil {
             await this.create(path);
         await writeFile(path, data);
     }
+
+    static async delete(path: string) {
+        if (fs.existsSync(path))
+            await unlink(path);
+    }
+
 }
