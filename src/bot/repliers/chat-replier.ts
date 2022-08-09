@@ -11,7 +11,7 @@ export class ChatReplier extends BaseReplier {
 
     async reply(bot: IBot, msg: Message): Promise<ReplyResult> {
         if (!msg.content) {
-            bot.replyText(msg, `你好，${msg._user?.name}`);
+            bot.replyText(msg, `你好，${msg._author.name}`);
             return { action: ReplyAction.Replied };
         }            
         if (!await this.checkAvailable(bot, msg)) {

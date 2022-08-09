@@ -1,8 +1,8 @@
-import { logger, Message, MewClient, Result, User } from "mewbot";
+import { logger, Message, MewClient, OutgoingMessage, Result, User } from "mewbot";
 import { Defender } from "./commons/defender.js";
 import { utils } from "./commons/utils.js";
 import { getAccount } from "./config/account.js";
-import config from "./config/config.js";
+import config, { MesageReplyMode } from "./config/config.js";
 import { IBot } from "./ibot.js";
 import { ChatReplier } from "./repliers/chat-replier.js";
 import { CrashReplier } from "./repliers/crash-replier.js";
@@ -84,9 +84,9 @@ export class Bot implements IBot {
     protected initNames() {
         this._names = new Array<string>();
         this._names.push(this._me.username);
-        if (config.allowAt.name)
+        if (config.triggers.name)
             this._names.push(this._me.name);
-        if (config.allowAt.alias)
+        if (config.triggers.alias)
             this._names.push(...config.alias);
         this._atRegex = new RegExp(`[@＠](${this._names.join('|')})`, 'g');
         logger.debug(this._atRegex);
@@ -117,9 +117,8 @@ export class Bot implements IBot {
      */
     protected async doProcessMessage(msg: Message) {
         // 用户在屏蔽列表中，返回
-        if (!msg._user) return;
-        if (this._defender.isBlocked(msg._user.id)) {
-            logger.debug(`Message from blocked user: ${msg._user.name} @${msg._user.username}`);
+        if (this._defender.isBlocked(msg._author.id)) {
+            logger.debug(`Message from blocked user: ${msg._author.name} @${msg._author.username}`);
             return;
         }
 
@@ -128,14 +127,25 @@ export class Bot implements IBot {
             // 配置不回复私聊，返回
             if (!config.replyDM) return;
             // 忽略私聊中由自己发出的消息
-            if (msg._user?.id == this._me.id) return;
+            if (msg._author.id == this._me.id) return;
         } else {    // 群聊
             // 不在配置中的话题（节点），返回
             if (!Reflect.has(config.topics, msg.topic_id)) return;
             // 没有文本内容，返回
             if (!msg.content) return;
-            // 不含@bot名，返回
-            if (msg.content.search(this._atRegex) == -1) return;  
+            // 判断是否触发
+            let isTriggered = false;
+            // 回复功能触发
+            if (config.triggers.reply) {
+                isTriggered = this.isReplyMe(msg);
+            } 
+            // @bot触发
+            if (!isTriggered && msg.content.search(this._atRegex) != -1) {
+                isTriggered = true;
+                this._atRegex.lastIndex = 0;
+            }
+            // 未被触发，返回
+            if (!isTriggered) return;
             msg.content = msg.content.replace(this._atRegex, '').trim();
             this._atRegex.lastIndex = 0;
         }
@@ -151,7 +161,7 @@ export class Bot implements IBot {
             if (result.action == ReplyAction.Replied) {
                 // ...额外处理逻辑
                 // 记录到Defender
-                this._defender.record(msg._user);
+                this._defender.record(msg._author);
                 // 是否需要撤回
                 if (result.recall?.messageId) {
                     await utils.sleep(result.recall.delay);
@@ -162,47 +172,75 @@ export class Bot implements IBot {
         }
     }
 
+    /**
+     * 判断是否是回复我的消息（暂时在表层实现，之后需要挪到mewbot中）
+     * @param msg 消息
+     */
+    protected isReplyMe(msg: Message) {
+        if (msg._otherUsers.length == 0) return false;
+        if (!msg.reply_to_message_id) return false;
+        // 作者不是我 且 相关用户信息中有我
+        for (const user of msg._otherUsers) {
+            if (user.id == this._me.id) return true;
+        }
+        return false;
+    }
+
+    /**
+     * 生成 @对方 文本
+     * @param msgToReply 要回复的消息
+     */
     protected getReplyTitle(msgToReply: Message) {
         let title = ''
         if (msgToReply._isDirect) return title;
-        if (!msgToReply._user) return title;
         // 群聊中可以回复来自自己的消息
         // 为了避免陷入死循环，对方名称含有bot名时不能加上@对方名
-        if (this._names.indexOf(msgToReply._user.name) != -1
-            || msgToReply._user.name.search(this._atRegex) != -1) {
-            if (this._names.indexOf(msgToReply._user.username) != -1)
+        if (this._names.indexOf(msgToReply._author.name) != -1
+            || msgToReply._author.name.search(this._atRegex) != -1) {
+            if (this._names.indexOf(msgToReply._author.username) != -1)
                 return title;
             else
-                return `@${msgToReply._user.username} `;
+                return `@${msgToReply._author.username} `;
         }
-        return `@${msgToReply._user.name} `;
+        return `@${msgToReply._author.name} `;
     }
 
-    async replyText(msgToReply: Message, reply: string) {
-        reply = this.getReplyTitle(msgToReply) + reply;
-        if (reply.length > MaxContentLength) {
-            const replies = new Array<string>();
-            while (reply.length != 0) {
-                replies.push(reply.slice(0, MaxContentLength))
-                reply = reply.slice(MaxContentLength, reply.length);
-            }
-            return await this.replyTexts(msgToReply, replies, false);
+    /**
+     * 根据当前回复模式，获取要回复的消息id
+     * @param to 待回复的消息 
+     * @param messageReplyMode 回复模式
+     */
+    protected getReplyMessageId(to: Message, messageReplyMode?: MesageReplyMode) {
+        messageReplyMode = messageReplyMode || config.messageReplyMode;
+        if (messageReplyMode == MesageReplyMode.Always) {
+            return to.id;
+        } else if (messageReplyMode == MesageReplyMode.Derivative) {
+            if (to.reply_to_message_id)
+                return to.id;
+        }
+        return;
+    }
+
+    async reply(to: Message, message: OutgoingMessage, messageReplyMode?: MesageReplyMode) {
+        message.replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
+        return await this._client.sendMessage(to.topic_id, message);
+    }
+
+    async replyText(to: Message, content: string, messageReplyMode?: MesageReplyMode) {
+        const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
+        // 只要使用了回复功能，就无需加上@对方
+        if (!replyToMessageId)
+            content = this.getReplyTitle(to) + content;
+        if (content.length > MaxContentLength) {
+            return (await this._client.sendTextMessageSafely(to.topic_id, content, replyToMessageId))[0];
         } else {
-            return await this._client.sendTextMessage(msgToReply.topic_id, reply);
+            return await this._client.sendTextMessage(to.topic_id, content, replyToMessageId);
         }
     }
 
-    async replyTexts(msgToReply: Message, replies: string[], needTitle = true) {
-        let result: Result<Message> = { error: { name: 'UnknownError' } };
-        if (needTitle) {
-            replies[0] = this.getReplyTitle(msgToReply) + replies[0];
-        }
-        for (let i = 0; i < replies.length; i++) {
-            result = await this._client.sendTextMessage(msgToReply.topic_id, replies[i]);
-            if (i != replies.length - 1)
-                await utils.sleep(200);
-        }
-        return result;
+    async replyImage(to: Message, imageFile: string, messageReplyMode?: MesageReplyMode) {
+        const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
+        return await this._client.sendImageMessage(to.topic_id, imageFile, replyToMessageId);
     }
 
 }

@@ -36,7 +36,7 @@ abstract class PictureSubReplier implements SubReplier {
         const file = await utils.randomItem(this._downloadFuncs)();
         let error;
         if (file) {
-            const image = await bot.client.sendImageMessage(msg.topic_id, file);
+            const image = await bot.replyImage(msg, file);
             if (!image.data || !image.data.id) {
                 error = this._sendErrorHint;
             } else {

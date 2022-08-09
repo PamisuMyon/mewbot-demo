@@ -57,7 +57,7 @@ export class DiceReplier extends BaseReplier {
 
 }
 
-interface DiceOptions {
+export interface DiceOptions {
     add: number;        // 前置加数
     rounds: number;     // 掷几轮
     times: number;      // 骰子数
@@ -65,7 +65,7 @@ interface DiceOptions {
     add2: number;       // 后置加数
 }
 
-class Dice {
+export class Dice {
     static roll(o: DiceOptions) {
         let result = ''
         if (o.rounds <= 0 || o.times <= 0 || o.dice <= 0) {

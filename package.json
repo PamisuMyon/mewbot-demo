@@ -11,6 +11,6 @@
   "license": "MIT",
   "dependencies": {
     "got": "^12.3.0",
-    "mewbot": "^1.0.1"
+    "mewbot": "^1.0.2"
   }
 }

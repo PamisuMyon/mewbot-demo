@@ -6,8 +6,8 @@ class MockBot extends Bot {
     
     override async replyText(msgToReply: Message, reply: string) {
         logger.debug('Reply:' + reply);
-        if (msgToReply._user)
-            this._defender.record(msgToReply._user);
+        if (msgToReply._author)
+            this._defender.record(msgToReply._author);
         return { data: { id: 'somefakeid' } as Message };
     }
 
@@ -38,7 +38,7 @@ async function consoleTest() {
                 content: s,
                 _isDirect: isDm,
                 _media: [],
-                _user: {
+                _author: {
                     id: 'ddd',
                     username: 'DDD',
                     name: '蒂蒂蒂',
