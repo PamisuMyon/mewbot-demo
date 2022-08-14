@@ -1,6 +1,5 @@
 import { Message, Node } from "mewbot";
-import { IBot } from "../ibot.js";
-import { SubReplier, PrimaryReplier, ReplyAction, ReplyResult, SubReplyTestResult } from "./replier.js";
+import { PrimaryReplier, SubReplier, SubReplyTestResult, IBot, ReplyResult, ReplyAction } from "../../bot/index.js";
 
 export class MewReplier extends PrimaryReplier {
     override type = 'mew';

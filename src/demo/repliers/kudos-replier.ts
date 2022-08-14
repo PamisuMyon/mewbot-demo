@@ -1,7 +1,5 @@
 import { AuthMode, Message } from "mewbot";
-import { utils } from "../commons/utils.js";
-import { IBot } from "../ibot.js";
-import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
+import { BaseReplier, IBot, ReplyResult, ReplyAction, utils } from "../../bot/index.js";
 
 export class KudosReplier extends BaseReplier {
 

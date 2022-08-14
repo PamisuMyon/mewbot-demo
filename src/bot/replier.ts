@@ -1,15 +1,14 @@
 import { Message } from "mewbot";
-import { Spam } from "../commons/spam.js";
-import { utils } from "../commons/utils.js";
-import config from "../config/config.js";
-import { IBot } from "../ibot.js";
+import { Spam } from "./spam.js";
+import { IBot } from "./ibot.js";
+import { utils } from "./commons/utils.js";
 
 /**
  * 对消息的处理行为
  */
 export enum ReplyAction {
     Abort,  // 终止
-    Pass,   // 跳过当前
+    Pass,   // 跳过当前回复器
     Replied,  // 已回复
 }
 
@@ -29,7 +28,8 @@ export abstract class BaseReplier {
     abstract type: string;
     protected _spams: { [topicId: string]: Spam } = {};
 
-    init() {
+    init(bot: IBot) {
+        const config = bot.config;
         for (const key in config.topics) {
             if (!config.topics[key].repliers[this.type])
                 continue;
@@ -41,20 +41,20 @@ export abstract class BaseReplier {
         }
     }
 
-    protected getConfig(topic_id: string) {
-        if (config.topics[topic_id])
-            return config.topics[topic_id].repliers[this.type];
+    protected getConfig(bot: IBot, topic_id: string) {
+        if (bot.config.topics[topic_id])
+            return bot.config.topics[topic_id].repliers[this.type];
     }
 
     /**
      * 判断功能在话题（节点）中是否可用
      */
     protected async checkAvailable(bot: IBot, msg: Message, shouldReply = true): Promise<boolean> {
-        const conf = this.getConfig(msg.topic_id);
+        const conf = this.getConfig(bot, msg.topic_id);
         if (!conf) {
             if (shouldReply) {
                 // 回复提示文本
-                await bot.replyText(msg, utils.randomItem(config.hints.replierUnavailable));
+                await bot.replyText(msg, utils.randomItem(bot.config.hints.replierUnavailable));
             }
             return false;
         }
@@ -116,7 +116,7 @@ export abstract class PrimaryReplier extends BaseReplier {
                     await bot.replyText(msg, '指令冷却中，请稍后再试');
                     return { action: ReplyAction.Replied };
                 } else {
-                    const hint = await bot.replyText(msg, `指令冷却中，请${spamCheck.remain! / 1000}后再试`);
+                    const hint = await bot.replyText(msg, `指令冷却中，请${utils.getTimeCounterText(spamCheck.remain!/1000)}后再试`);
                     if (hint.data) {
                         return { 
                             action: ReplyAction.Replied, 

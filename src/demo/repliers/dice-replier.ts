@@ -1,7 +1,5 @@
 import { Message } from "mewbot";
-import { utils } from "../commons/utils.js";
-import { IBot } from "../ibot.js";
-import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
+import { BaseReplier, IBot, ReplyResult, ReplyAction, utils } from "../../bot/index.js";
 
 /**
  * 骰娘的本职工作

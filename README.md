@@ -23,7 +23,7 @@ tsc --watch false
 ```
 
 ### 配置
-在根目录下创建账号配置文件**account.json**:
+在`项目根目录/storage`下创建账号配置文件**account.json**:
 
 ```json
 {

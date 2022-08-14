@@ -1,6 +1,6 @@
 import { Message, logger, LogLevel } from 'mewbot';
 import * as readline from 'readline';
-import { Bot } from './bot.js';
+import { Bot } from '../bot/index.js';
 
 class MockBot extends Bot {
     

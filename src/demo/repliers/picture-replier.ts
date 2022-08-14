@@ -1,10 +1,6 @@
 import { logger, LogLevel, Message } from "mewbot";
 import got from "got";
-import { NetUtil } from "../commons/net-util.js";
-import { utils } from "../commons/utils.js";
-import { IBot } from "../ibot.js";
-import { SubReplier, PrimaryReplier, ReplyAction, ReplyResult, SubReplyTestResult } from "./replier.js";
-import { FileUtil } from "../commons/file-util.js";
+import { PrimaryReplier, SubReplier, SubReplyTestResult, IBot, ReplyResult, utils, FileUtil, ReplyAction, NetUtil } from "../../bot/index.js";
 
 export class PictureReplier extends PrimaryReplier {
     

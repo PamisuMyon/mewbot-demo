@@ -1,7 +1,5 @@
 import { Message } from "mewbot";
-import { utils } from "../commons/utils.js";
-import { IBot } from "../ibot.js";
-import { BaseReplier, ReplyAction, ReplyResult } from "./replier.js";
+import { BaseReplier, IBot, ReplyResult, ReplyAction, utils } from "../../bot/index.js";
 
 export class CrashReplier extends BaseReplier {
     type = 'crash';
@@ -20,7 +18,7 @@ export class CrashReplier extends BaseReplier {
         }
 
         let defaultTimeout = 100;
-        const config = this.getConfig(msg.topic_id);
+        const config = this.getConfig(bot, msg.topic_id);
         if (config && !isNaN(config.defaultTimeout)) {
             defaultTimeout = config.defaultTimeout;
         }

@@ -4,8 +4,8 @@
   "description": "Demo of mewbot",
   "type": "module",
   "scripts": {
-    "bot": "node dist/bot/app.js",
-    "mock": "node dist/bot/mock.js"
+    "bot": "node dist/demo/app.js",
+    "mock": "node dist/demo/mock.js"
   },
   "author": "Pamisu",
   "license": "MIT",
