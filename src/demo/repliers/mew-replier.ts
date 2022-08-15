@@ -1,33 +1,35 @@
 import { Message, Node } from "mewbot";
-import { PrimaryReplier, SubReplier, SubReplyTestResult, IBot, ReplyResult, ReplyAction } from "../../bot/index.js";
+import { MatryoshkaReplier,  TestInfo, IBot, ReplyResult, Replier, NoConfidence, Replied } from "../../bot/index.js";
 
-export class MewReplier extends PrimaryReplier {
+export class MewReplier extends MatryoshkaReplier {
     override type = 'mew';
 
-    protected override _subRepliers = [
+    protected override _children = [
         new NodeInfoSubReplier(),
     ];
 
 }
 
-class NodeInfoSubReplier implements SubReplier {
+class NodeInfoSubReplier extends Replier {
+
+    type = 'mew/node-info' ;
 
     protected _regex = /(查询)?据点(信息)? *　*(.*)/;
 
-    async test(msg: Message): Promise<SubReplyTestResult> {
+    override async test(msg: Message): Promise<TestInfo> {
         const r = this._regex.exec(msg.content as string);
         if (r) {
             return { confidence: 1, data: r[3] };
         }
-        return { confidence: 0 };
+        return NoConfidence;
     }
 
-    async reply(bot: IBot, msg: Message, data?: any): Promise<ReplyResult> {
-        if (!data) {
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
+        if (!test.data) {
             await bot.replyText(msg, '指令输入错误，需要指定据点ID');
-            return { action: ReplyAction.Replied };
+            return Replied;
         }
-        const info = await bot.client.getNodeInfo(data as string);
+        const info = await bot.client.getNodeInfo(test.data as string);
         if (info.data) {
             await bot.replyText(msg, this.beautifyNodeInfo(info.data));
         } else {
@@ -39,7 +41,7 @@ class NodeInfoSubReplier implements SubReplier {
             }
             await bot.replyText(msg, hint);
         }
-        return { action: ReplyAction.Replied };
+        return Replied;
     }
 
     protected beautifyNodeInfo(info: Node) {

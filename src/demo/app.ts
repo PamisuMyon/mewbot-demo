@@ -9,7 +9,6 @@ import { PictureReplier } from "./repliers/picture-replier.js";
 import { DemoStorage } from "./storage.js";
 
 logger.logLevel = LogLevel.Debug;
-const bot = new Bot();
 const options: InitOptions = {
     storage: new DemoStorage(),
     repliers: [
@@ -21,5 +20,5 @@ const options: InitOptions = {
         new ChatReplier(),
     ],
 };
-bot.init(options);
+const bot = new Bot(options);
 bot.launch();

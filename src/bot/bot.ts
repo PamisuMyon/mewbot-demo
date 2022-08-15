@@ -2,7 +2,7 @@ import { Constants, logger, Message, MewClient, OutgoingMessage, User } from "me
 import { Defender } from "./defender.js";
 import { BotConfig, MesageReplyMode } from "./config.js";
 import { IBot, InitOptions } from "./ibot.js";
-import { BaseReplier, ReplyAction } from "./replier.js";
+import { Replier, ReplierPickFunction, TestInfo } from "./replier.js";
 import { utils } from "./commons/utils.js";
 import { IStorage } from "./storage/istorage.js";
 import { FileStorage } from "./storage/file-storage.js";
@@ -19,16 +19,21 @@ export class Bot implements IBot {
     protected _names!: Array<string>;
     protected _atRegex!: RegExp;
     protected _defender!: Defender;
-    protected _repliers!: Array<BaseReplier>;
+    protected _repliers!: Array<Replier>;
+    /**
+     * 回复器挑选函数，内置实现参照 {@link Replier.pick01}（默认）, {@link Replier.pick} 
+     */
+    protected _pickFunc!: ReplierPickFunction;
 
     /**
      * 初始化
      * @param options 选项 
      */
-    init(options: InitOptions) {
+    constructor(options: InitOptions) {
         const opt = options? options : {} as InitOptions;
         this._storage = opt.storage? opt.storage : new FileStorage();
         this._repliers = opt.repliers;
+        this._pickFunc = opt.replierPickFunction? opt.replierPickFunction : Replier.pick01;
     }
 
     /**
@@ -140,53 +145,70 @@ export class Bot implements IBot {
             return;
         }
 
+        // 判断是否触发
+        let isTriggered = false;
+        const isReplyMe = this.isReplyMe(msg);
+
         // 判断是否符合回复条件
-        if (msg._isDirect) {    // 私聊
+        if (msg._isDirect) {    
+            // 私聊
             // 配置不回复私聊，返回
             if (!this.config.replyDM) return;
             // 忽略私聊中由自己发出的消息
             if (msg._author.id == this._me.id) return;
-        } else {    // 群聊
+            isTriggered = true;
+        } else {    
+            // 群聊
             // 不在配置中的话题（节点），返回
             if (!Reflect.has(this.config.topics, msg.topic_id)) return;
-            // 没有文本内容，返回
-            if (!msg.content) return;
-            // 判断是否触发
-            let isTriggered = false;
-            // 回复功能触发
-            if (this.config.triggers.reply) {
-                isTriggered = this.isReplyMe(msg);
-            } 
-            // @bot触发
-            if (!isTriggered && msg.content.search(this._atRegex) != -1) {
-                isTriggered = true;
+            // 非识别指令模式
+            if (!this.config.triggers.command) {
+                // 回复功能触发
+                if (this.config.triggers.reply) {
+                    isTriggered = isReplyMe;
+                }
+                // @bot触发
+                if (!isTriggered && msg.content) {
+                    if (!isTriggered && msg.content.search(this._atRegex) != -1) {
+                        isTriggered = true;
+                        this._atRegex.lastIndex = 0;
+                    }
+                }
+            }
+        }
+        
+        // 挑选匹配的回复器
+        let testInfo: TestInfo | undefined;
+        if (isTriggered || this.config.triggers.command) {
+            // 去除可能存在的@bot
+            if (msg.content) {
+                msg.content = msg.content.replace(this._atRegex, '').trim();
                 this._atRegex.lastIndex = 0;
             }
-            // 未被触发，返回
-            if (!isTriggered) return;
-            msg.content = msg.content.replace(this._atRegex, '').trim();
-            this._atRegex.lastIndex = 0;
+            /**
+             * 默认的pickFunc参照 {@link Replier.pick01}, {@link Replier.pick} 
+             */
+            testInfo = await this._pickFunc(this._repliers, msg, {
+                isCommandMode: !isTriggered && this.config.triggers.command, 
+                isReplyMe,
+            });
         }
-
+        if (!testInfo) return;
+        
         // 执行回复
-        for (const replier of this._repliers) {
-            const result = await replier.reply(this, msg);
-
-            if (result.action == ReplyAction.Abort)
-                return;
-            if (result.action == ReplyAction.Pass)
-                continue;
-            if (result.action == ReplyAction.Replied) {
-                // ...额外处理逻辑
-                // 记录到Defender
-                this._defender.record(msg._author);
-                // 是否需要撤回
-                if (result.recall?.messageId) {
-                    await utils.sleep(result.recall.delay);
-                    await this.client.deleteMessage(result.recall.messageId);
-                }
-                return;
+        const replier = utils.getElemSafe(this._repliers, testInfo.replierIndex!);
+        if (!replier) return;
+        const result = await replier.reply(this, msg, testInfo);
+        if (result && result.success) {
+            // ...额外处理逻辑
+            // 记录到Defender
+            this._defender.record(msg._author);
+            // 是否需要撤回
+            if (result.recall?.messageId) {
+                await utils.sleep(result.recall.delay);
+                await this.client.deleteMessage(result.recall.messageId);
             }
+            return;
         }
     }
 

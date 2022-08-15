@@ -1,20 +1,21 @@
 import { Message } from "mewbot";
-import { BaseReplier, IBot, ReplyResult, ReplyAction, utils } from "../../bot/index.js";
+import { Replier, IBot, ReplyResult, utils, TestInfo, TestParams, NoConfidence, FullConfidence, Replied } from "../../bot/index.js";
 
-export class CrashReplier extends BaseReplier {
+export class CrashReplier extends Replier {
+
     type = 'crash';
 
     protected _regex = /来点(闪退|崩溃) *　*(\d*)/
 
-    async reply(bot: IBot, msg: Message): Promise<ReplyResult> {
-        if (!msg.content) {
-            return { action: ReplyAction.Pass };
-        }
-        if (!this._regex.test(msg.content)) {
-            return { action: ReplyAction.Pass };
-        }
+    override async test(msg: Message, options: TestParams): Promise<TestInfo> {
+        if (!msg.content) return NoConfidence;
+        if (this._regex.test(msg.content)) return FullConfidence;
+        else return NoConfidence;
+    }
+
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
         if (!await this.checkAvailable(bot, msg)) {
-            return { action: ReplyAction.Replied };
+            return Replied;
         }
 
         let defaultTimeout = 100;
@@ -23,7 +24,7 @@ export class CrashReplier extends BaseReplier {
             defaultTimeout = config.defaultTimeout;
         }
 
-        const r = this._regex.exec(msg.content);
+        const r = this._regex.exec(msg.content!);
         let timeout = utils.getNumber(r![2], defaultTimeout);
         timeout = Math.max(timeout, 100);
         
@@ -35,7 +36,7 @@ export class CrashReplier extends BaseReplier {
             const b = await bot.client.deleteMessage(result.data.id);
             await bot.replyText(msg, b? '测试完毕，请描述您的感受' : '测试失败，猫砂盆已被炸毁');
         }
-        return { action: ReplyAction.Replied };
+        return Replied;
     }
 
 }

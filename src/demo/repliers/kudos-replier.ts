@@ -1,9 +1,10 @@
 import { AuthMode, Message } from "mewbot";
-import { BaseReplier, IBot, ReplyResult, ReplyAction, utils } from "../../bot/index.js";
+import { Replier, IBot, ReplyResult, utils, TestInfo, TestParams, NoConfidence, FullConfidence, Replied } from "../../bot/index.js";
 
-export class KudosReplier extends BaseReplier {
+export class KudosReplier extends Replier {
 
     type = 'kudos';
+
     protected _regex = /(给)?猫猫加油/;
     protected _roles = [
         '😸', '🤖', '🌰', '🐯', '🐶', 
@@ -12,15 +13,15 @@ export class KudosReplier extends BaseReplier {
     ];
     protected _effects = ['💥', '💦', '⚡', '✨', '🎉'];
 
-    async reply(bot: IBot, msg: Message): Promise<ReplyResult> {
-        if (!msg.content) {
-            return { action: ReplyAction.Pass };
-        }
-        if (!this._regex.test(msg.content)) {
-            return { action: ReplyAction.Pass };
-        }
+    override async test(msg: Message, options: TestParams): Promise<TestInfo> {
+        if (!msg.content) return NoConfidence;
+        if (this._regex.test(msg.content)) return FullConfidence;
+        else return NoConfidence;
+    }
+
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
         if (!await this.checkAvailable(bot, msg)) {
-            return { action: ReplyAction.Replied };
+            return Replied;
         }
 
         const result = await this.addKudos(bot, 0);
@@ -31,7 +32,7 @@ export class KudosReplier extends BaseReplier {
             reply = '给猫猫加油失败😿';
         }
         await bot.replyText(msg, reply);
-        return { action: ReplyAction.Replied };
+        return Replied;
     }
 
     /**

@@ -1,13 +1,12 @@
 import { Message } from "mewbot";
-import { BaseReplier, IBot, ReplyResult, ReplyAction, utils } from "../../bot/index.js";
+import { Replier, IBot, ReplyResult, utils, TestInfo, TestParams, NoConfidence, Replied, FullConfidence } from "../../bot/index.js";
 
 /**
  * 骰娘的本职工作
  */
-export class DiceReplier extends BaseReplier {
+export class DiceReplier extends Replier {
 
     type = 'dice';
-    isPromise = false;
 
     protected _regex = /((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?/i;
     protected _errorHints = [
@@ -19,18 +18,18 @@ export class DiceReplier extends BaseReplier {
         '一次掷太多啦！',
     ];
 
-    async reply(bot: IBot, msg: Message): Promise<ReplyResult> {
-        if (!msg.content) {
-            return { action: ReplyAction.Pass };
-        }
-        if (!this._regex.test(msg.content)) {
-            return { action: ReplyAction.Pass };
-        }
+    override async test(msg: Message, options: TestParams): Promise<TestInfo> {
+        if (!msg.content) return NoConfidence;
+        if (this._regex.test(msg.content)) return FullConfidence;
+        else return NoConfidence;
+    }
+
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
         if (!await this.checkAvailable(bot, msg)) {
-            return { action: ReplyAction.Replied };
+            return Replied;
         }
         
-        const lines = msg.content.split('\n');
+        const lines = msg.content!.split('\n');
         const options = new Array<DiceOptions>();
         for (const line of lines) {
             const r = this._regex.exec(line);
@@ -50,7 +49,7 @@ export class DiceReplier extends BaseReplier {
         }
 
         await bot.replyText(msg, reply);
-        return { action: ReplyAction.Replied };
+        return Replied;
     }
 
 }

@@ -1,19 +1,19 @@
 import { logger, LogLevel, Message } from "mewbot";
 import got from "got";
-import { PrimaryReplier, SubReplier, SubReplyTestResult, IBot, ReplyResult, utils, FileUtil, ReplyAction, NetUtil } from "../../bot/index.js";
+import { MatryoshkaReplier, TestInfo, IBot, ReplyResult, utils, FileUtil, NetUtil, Replier, TestParams, FullConfidence, NoConfidence, Replied } from "../../bot/index.js";
 
-export class PictureReplier extends PrimaryReplier {
+export class PictureReplier extends MatryoshkaReplier {
     
     override type = 'picture';
 
-    protected override _subRepliers = [
+    protected override _children = [
         new KittySubReplier(),
         new DogeSubReplier(),
     ];
 
 }
 
-abstract class PictureSubReplier implements SubReplier {
+abstract class PictureSubReplier extends Replier {
     
     protected _timeout = 8000;
     protected abstract _regex: RegExp;
@@ -22,12 +22,13 @@ abstract class PictureSubReplier implements SubReplier {
     protected abstract _downloadErrorHint: string;
     protected abstract _sendErrorHint: string;
 
-    async test(msg: Message): Promise<SubReplyTestResult> {
+    override async test(msg: Message, options: TestParams): Promise<TestInfo> {
+        if (!msg.content) return NoConfidence;
         const b = this._regex.test(msg.content as string);
-        return { confidence: b? 1 : 0 };
+        return b? FullConfidence : NoConfidence;
     }
 
-    async reply(bot: IBot, msg: Message, data?: any): Promise<ReplyResult> {
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
         const hint = await bot.replyText(msg, this._downloadingHint);
         const file = await utils.randomItem(this._downloadFuncs)();
         let error;
@@ -49,12 +50,14 @@ abstract class PictureSubReplier implements SubReplier {
         if (error) {
             await bot.replyText(msg, error);
         }
-        return { action: ReplyAction.Replied };
+        return Replied;
     }
 
 }
 
 class KittySubReplier extends PictureSubReplier {
+
+    type = 'picture/kitty';
 
     protected override _regex = /来(点|电|份|张)猫(猫|图)/;
     protected _downloadingHint = '正在努力寻找猫猫...';
@@ -101,6 +104,8 @@ class KittySubReplier extends PictureSubReplier {
 }
 
 class DogeSubReplier extends PictureSubReplier {
+
+    type = 'picture/doge';
 
     protected _regex = /来(点|电|份|张)狗(狗|图)/;
     protected _downloadingHint = '正在努力寻找狗狗...';

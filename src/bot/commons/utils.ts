@@ -38,5 +38,11 @@ export class utils {
             return time + '分钟';
         }
     }
+
+    static getElemSafe<T>(arr: T[], index: number) {
+        if (!arr) return;
+        if (index < 0 || index >= arr.length) return;
+        return arr[index];
+    }
     
 }

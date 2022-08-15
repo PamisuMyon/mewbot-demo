@@ -1,6 +1,6 @@
 import { Message, MewClient, OutgoingMessage, Result } from "mewbot";
 import { BotConfig, MesageReplyMode } from "./config.js";
-import { BaseReplier } from "./replier.js";
+import { Replier, ReplierPickFunction } from "./replier.js";
 import { IStorage } from "./storage/istorage.js";
 
 /**
@@ -14,8 +14,6 @@ export interface IBot {
 
     get config(): BotConfig;
 
-    init(options: InitOptions): void;
-
     launch(): Promise<void>;
 
     refresh(): Promise<void>;
@@ -28,7 +26,22 @@ export interface IBot {
     
 }
 
+/**
+ * bot初始化选项
+ */
 export interface InitOptions {
+    /**
+     * 存储，默认为{@link FileStorage}
+     */
     storage?: IStorage;
-    repliers: BaseReplier[];
+    /**
+     * 回复器列表，回复器位置越前，优先级越高
+     */
+    repliers: Replier[];
+    /**
+     * 回复器挑选函数
+     * 
+     * 内置实现参照 {@link Replier.pick01}（默认）, {@link Replier.pick} 
+     */
+    replierPickFunction?: ReplierPickFunction;
 }

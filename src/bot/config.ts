@@ -9,7 +9,7 @@ export interface BotConfig {
      */ 
     alias: string[];
     /**
-     * 触发bot的方式
+     * 群聊中触发bot的方式
      */
     triggers: {
         /**
@@ -33,7 +33,7 @@ export interface BotConfig {
          */
         reply: boolean;
         /**
-         * TODO 识别指令模式
+         * 识别指令模式
          */
         command: boolean;
     };
