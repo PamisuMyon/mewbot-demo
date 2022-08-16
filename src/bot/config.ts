@@ -164,7 +164,7 @@ export const defaultConfig: Required<BotConfig> = {
         alias: true,
         mention: true,
         reply: true,
-        command: false, // TODO 识别指令模式
+        command: false,
     },
     replyDM: true,
     messageReplyMode: MesageReplyMode.Derivative,

@@ -12,7 +12,7 @@ export class DemoStorage extends FileStorage {
         this._config = {
             ...demoBotConfig,
             ...this._config,
-        }
+        };
         return this._config;
     }
 }

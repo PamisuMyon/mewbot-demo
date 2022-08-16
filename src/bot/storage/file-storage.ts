@@ -12,7 +12,7 @@ export class FileStorage implements IStorage {
     protected _config!: Required<BotConfig>;
     get config(): Required<BotConfig> { return this._config; }
     protected _blockList!: Array<Partial<User>>;
-    get blockList() { return this._blockList }
+    get blockList() { return this._blockList; }
 
     protected async readFile(path: string, log = true) {
         if (!(await FileUtil.exists(path))) {
@@ -49,7 +49,7 @@ export class FileStorage implements IStorage {
         this._config = {
             ...defaultConfig,
             ...this._config,
-        }
+        };
         return this._config;
     }
 

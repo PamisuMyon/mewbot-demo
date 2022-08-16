@@ -9,7 +9,7 @@ export class utils {
     }
 
     static randomItem<T>(array: T[]) {
-        let index = this.randomInt(0, array.length - 1);
+        const index = this.randomInt(0, array.length - 1);
         return array[index];
     }
 

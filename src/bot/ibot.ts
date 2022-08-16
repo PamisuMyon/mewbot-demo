@@ -37,7 +37,7 @@ export interface InitOptions {
     /**
      * 回复器列表，回复器位置越前，优先级越高
      */
-    repliers: Replier[];
+    repliers?: Replier[];
     /**
      * 回复器挑选函数
      * 

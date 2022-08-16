@@ -40,7 +40,7 @@ export class DiceReplier extends Replier {
                 times: utils.getNumber(r[5], 1),
                 dice: utils.getNumber(r[6], 0),
                 add2: utils.getNumber(r[8], 0),
-            }
+            };
             options.push(option);
         }
         let reply = Dice.rolls(options, this._errorHints, this._tooManyHints);
@@ -64,7 +64,7 @@ export interface DiceOptions {
 
 export class Dice {
     static roll(o: DiceOptions) {
-        let result = ''
+        let result = '';
         if (o.rounds <= 0 || o.times <= 0 || o.dice <= 0) {
             return result;
         } else {
@@ -83,7 +83,7 @@ export class Dice {
                 }
                 result += '=';
                 if (o.times == 1) {
-                    num = utils.randomInt(1, o.dice)
+                    num = utils.randomInt(1, o.dice);
                     if (o.add != 0 || o.add2 != 0) {
                         if (o.add != 0) {
                             result += `${o.add}+`;

@@ -5,7 +5,7 @@ export class CrashReplier extends Replier {
 
     type = 'crash';
 
-    protected _regex = /来点(闪退|崩溃) *　*(\d*)/
+    protected _regex = /来点(闪退|崩溃) *　*(\d*)/;
 
     override async test(msg: Message, options: TestParams): Promise<TestInfo> {
         if (!msg.content) return NoConfidence;

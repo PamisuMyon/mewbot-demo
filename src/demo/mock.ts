@@ -1,13 +1,30 @@
 import { Message, logger, LogLevel } from 'mewbot';
 import * as readline from 'readline';
-import { Bot } from '../bot/index.js';
+import { Bot, MesageReplyMode } from '../bot/index.js';
+import { ChatReplier } from './repliers/chat-replier.js';
+import { CrashReplier } from './repliers/crash-replier.js';
+import { DiceReplier } from './repliers/dice-replier.js';
+import { KudosReplier } from './repliers/kudos-replier.js';
+import { MewReplier } from './repliers/mew-replier.js';
+import { PictureReplier } from './repliers/picture-replier.js';
+import { DemoStorage } from './storage.js';
 
 class MockBot extends Bot {
     
-    override async replyText(msgToReply: Message, reply: string) {
-        logger.debug('Reply:' + reply);
-        if (msgToReply._author)
-            this._defender.record(msgToReply._author);
+    protected override _storage = new DemoStorage();
+    protected override _repliers = [
+        new DiceReplier(),
+        new MewReplier(),
+        new CrashReplier(),
+        new PictureReplier(),
+        new KudosReplier(),
+        new ChatReplier(),
+    ];
+
+    override async replyText(to: Message, content: string, messageReplyMode?: MesageReplyMode) {
+        logger.debug(`Message: ${to.content}  Reply Text: ${content}`);
+        if (to._author)
+            this._defender.record(to._author);
         return { data: { id: 'somefakeid' } as Message };
     }
 
@@ -32,7 +49,7 @@ async function consoleTest() {
                 id: '1123466296112321218477273662619293872',
                 author_id: 'ddd',
                 node_id: 'not_a_robot',
-                topic_id: '219353468583456768',
+                topic_id: '222154400563036161',
                 media: [],
                 objects: {},
                 content: s,
@@ -42,7 +59,8 @@ async function consoleTest() {
                     id: 'ddd',
                     username: 'DDD',
                     name: '蒂蒂蒂',
-                }
+                },
+                _otherUsers: [],
             };
             bot.addMockMessage(msg);
         }

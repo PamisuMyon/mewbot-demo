@@ -72,8 +72,8 @@ class KittySubReplier extends PictureSubReplier {
         const url = 'https://api.thecatapi.com/v1/images/search';
         try {
             logger.debug('Downloading the cat api');
-            let { body } = await got.get(url, { timeout: { request: this._timeout } });
-            let parse = JSON.parse(body);
+            const { body } = await got.get(url, { timeout: { request: this._timeout } });
+            const parse = JSON.parse(body);
             const split = parse[0].url.split('/');
             const fileName = split[split.length - 1];
             const filePath = './cache/images/' + fileName;

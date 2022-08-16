@@ -21,7 +21,7 @@ export class Spam {
     protected _interval: number;
     protected _threshold: number;
     protected _cooldown: number;
-    protected _infos: { [id: string]: SpamInfo }
+    protected _infos: { [id: string]: SpamInfo };
 
     /**
      * @param interval 连击生效间隔 单位毫秒

@@ -35,7 +35,7 @@ class NodeInfoSubReplier extends Replier {
         } else {
             let hint: string;
             if (info.error?.status == 404) {
-                hint = '据点不存在👀'
+                hint = '据点不存在👀';
             } else {
                 hint = '获取据点信息失败😭';
             }

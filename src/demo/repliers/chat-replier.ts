@@ -27,7 +27,7 @@ export class ChatReplier extends Replier {
         if (r) {
             content = new Array(r.length + 1).join('🥕');
         } else {
-            content = utils.randomItem(bot.config.hints.fallback)
+            content = utils.randomItem(bot.config.hints.fallback);
         }
         await bot.replyText(msg, content);
         return Replied;

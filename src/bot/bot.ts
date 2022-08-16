@@ -29,10 +29,10 @@ export class Bot implements IBot {
      * 初始化
      * @param options 选项 
      */
-    constructor(options: InitOptions) {
+    constructor(options?: InitOptions) {
         const opt = options? options : {} as InitOptions;
         this._storage = opt.storage? opt.storage : new FileStorage();
-        this._repliers = opt.repliers;
+        this._repliers = opt.repliers? opt.repliers : [];
         this._pickFunc = opt.replierPickFunction? opt.replierPickFunction : Replier.pick01;
     }
 
@@ -76,9 +76,7 @@ export class Bot implements IBot {
         setInterval(() => this.processMessages(), this.config.messageProcessInterval);
 
         // 开启连接
-        this._client.connect({ subcriptionNodes: this.config.nodes })
-
-        console.dir(this.config);
+        this._client.connect({ subcriptionNodes: this.config.nodes });
     }
 
     /**
@@ -157,10 +155,12 @@ export class Bot implements IBot {
             // 忽略私聊中由自己发出的消息
             if (msg._author.id == this._me.id) return;
             isTriggered = true;
+            logger.debug(`Direct Message: ${msg.content}`);
         } else {    
             // 群聊
             // 不在配置中的话题（节点），返回
             if (!Reflect.has(this.config.topics, msg.topic_id)) return;
+            logger.debug(`Public Message: ${msg.content}`);
             // 非识别指令模式
             if (!this.config.triggers.command) {
                 // 回复功能触发
@@ -198,6 +198,7 @@ export class Bot implements IBot {
         // 执行回复
         const replier = utils.getElemSafe(this._repliers, testInfo.replierIndex!);
         if (!replier) return;
+        logger.debug(`Reply message with replier: ${replier.type}`);
         const result = await replier.reply(this, msg, testInfo);
         if (result && result.success) {
             // ...额外处理逻辑
@@ -231,15 +232,14 @@ export class Bot implements IBot {
      * @param msgToReply 要回复的消息
      */
     protected getReplyTitle(msgToReply: Message) {
-        let title = ''
-        if (msgToReply._isDirect) return title;
+        if (msgToReply._isDirect) return '';
         // 群聊中可以回复来自自己的消息
         // 为了避免陷入死循环，对方名称含有bot名时不能加上@对方名
         if (this._names.indexOf(msgToReply._author.name) != -1
             || msgToReply._author.name.search(this._atRegex) != -1) {
             this._atRegex.lastIndex = 0;
             if (this._names.indexOf(msgToReply._author.username) != -1)
-                return title;
+                return '';
             else
                 return `@${msgToReply._author.username} `;
         }
@@ -262,13 +262,14 @@ export class Bot implements IBot {
         return;
     }
 
+    // TODO 记录发出的消息，用于忽略
     async reply(to: Message, message: OutgoingMessage, messageReplyMode?: MesageReplyMode) {
         message.replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
         return await this._client.sendMessage(to.topic_id, message);
     }
 
     async replyText(to: Message, content: string, messageReplyMode?: MesageReplyMode) {
-        logger.debug(`Message: ${to.content} Reply text: ${content}`);
+        logger.debug(`To: ${to.content}  Reply Text: ${content}`);
         const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
         // 只要使用了回复功能，就无需加上@对方
         if (!replyToMessageId)
@@ -281,7 +282,7 @@ export class Bot implements IBot {
     }
 
     async replyImage(to: Message, imageFile: string, messageReplyMode?: MesageReplyMode) {
-        logger.debug(`Message: ${to.content} Reply image: ${imageFile}`);
+        logger.debug(`To: ${to.content}  Reply Image: ${imageFile}`);
         const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
         return await this._client.sendImageMessage(to.topic_id, imageFile, replyToMessageId);
     }

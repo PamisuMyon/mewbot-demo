@@ -6,7 +6,7 @@ import { utils } from "./commons/utils.js";
 /**
  * 回复器测试结果
  */
- export interface TestInfo {
+export interface TestInfo {
     /**
      * 置信度
      */

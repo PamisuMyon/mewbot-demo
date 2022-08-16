@@ -11,7 +11,7 @@ import { logger, LogLevel, MewClient } from "mewbot";
             console.log(`${topic.name} : ${topic.id}`);
         }
     } else {
-        console.log('获取据点信息失败')
+        console.log('获取据点信息失败');
     }
 })();
 

@@ -11,7 +11,7 @@ export const demoBotConfig: Required<BotConfig> = {
         alias: true,        // @别名
         mention: true,      // 预留未来可能会有的官方@功能
         reply: true,        // 回复bot的消息
-        command: false,     // TODO 识别指令模式
+        command: true,     // 识别指令模式
     },
     replyDM: false,      // 是否回复私聊消息
     messageReplyMode: MesageReplyMode.None,   // 回复功能使用模式
@@ -111,4 +111,4 @@ export const defaultTopicConfig: TopicConfig = {
             }
         },
     }
-}
+};

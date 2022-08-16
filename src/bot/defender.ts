@@ -1,5 +1,4 @@
 import { logger, User } from "mewbot";
-import { FileUtil } from "./commons/file-util.js";
 import { Spam } from "./spam.js";
 import { IStorage } from "./storage/istorage.js";
 
