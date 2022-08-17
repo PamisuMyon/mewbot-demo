@@ -1,6 +1,6 @@
 import { Message, logger, LogLevel } from 'mewbot';
 import * as readline from 'readline';
-import { Bot, MesageReplyMode } from '../bot/index.js';
+import { MewBot, MesageReplyMode } from '../bot/index.js';
 import { ChatReplier } from './repliers/chat-replier.js';
 import { CrashReplier } from './repliers/crash-replier.js';
 import { DiceReplier } from './repliers/dice-replier.js';
@@ -9,7 +9,7 @@ import { MewReplier } from './repliers/mew-replier.js';
 import { PictureReplier } from './repliers/picture-replier.js';
 import { DemoStorage } from './storage.js';
 
-class MockBot extends Bot {
+class MockBot extends MewBot {
     
     protected override _storage = new DemoStorage();
     protected override _repliers = [

@@ -1,6 +1,9 @@
 import { User } from "mewbot";
 import { Account, BotConfig } from "../config.js";
 
+/**
+ * 存储接口
+ */
 export interface IStorage {
 
     getAccount(): Promise<Account | undefined>;

@@ -1,19 +1,43 @@
 interface SpamInfo {
-    id: string;     // 可以为任意id，为用户id时，按用户行为计算冷却，为话题id时，按话题行为计算冷却等等
-    cmdCount: number;  // 累计使用指令次数
-    cmdTime: number;   // 上一次使用指令时间
-    cooldownTime: number;   // 目标冷却时间
-    failedTimes: number;     // 不通过次数
+    /**
+     * 可以为任意id，为用户id时，按用户行为计算冷却，为话题id时，按话题行为计算冷却等等
+     */
+    id: string;
+    /**
+     * 累计使用指令次数
+     */
+    cmdCount: number; 
+    /**
+     * 上一次使用指令时间
+     */
+    cmdTime: number;
+    /**
+     * 目标冷却时间
+     */
+    cooldownTime: number; 
+    /**
+     * 不通过次数
+     */
+    failedTimes: number; 
 }
 
 export interface CheckResult { 
-    pass: boolean;      // 是否通过
-    remain?: number;        // 剩余冷却时间
-    failedTimes?: number;     // 不通过次数
+    /**
+     * 是否通过
+     */
+    pass: boolean; 
+    /**
+     * 剩余冷却时间
+     */
+    remain?: number;   
+    /**
+     * 不通过次数
+     */
+    failedTimes?: number; 
 }
 
 /**
- * 防刷屏检测
+ * 指令冷却检测
  * 使用示例参照 {@link PrimaryReplier}
  */
 export class Spam {

@@ -1,4 +1,4 @@
-export * from "./bot.js";
+export * from "./mew-bot.js";
 export * from "./config.js";
 export * from "./defender.js";
 export * from "./ibot.js";

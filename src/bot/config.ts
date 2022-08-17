@@ -1,5 +1,5 @@
 /**
- * bot配置项
+ * bot配置项，默认配置参考 {@link defaultConfig}
  * 
  * 大部分配置支持在bot运行时动态刷新，参考{@link IStorage} {@link FileStorage}
  */
@@ -7,40 +7,48 @@ export interface BotConfig {
     /**
      * bot别名，在判断@bot时与bot的账号、用户名等效 
      */ 
-    alias: string[];
+    alias?: string[];
     /**
      * 群聊中触发bot的方式
      */
     triggers: {
         /**
-         * @MEWID
+         * at模式，@MEWID
          */
         username: boolean;
         /**
-         * @昵称
+         * at模式，@昵称
          */
         name: boolean;
         /**
-         * @别名
+         * at模式，@别名
          */
         alias: boolean;
         /**
-         * 预留未来可能会有的官方@功能
+         * at模式，预留未来可能会有的官方@功能
          */
         mention: boolean;
         /**
-         * 回复bot的消息
+         * 回复模式，回复bot的消息将触发bot
          */
         reply: boolean;
         /**
          * 识别指令模式
+         * 
+         * 该模式开启时，只要有匹配的回复器即可触发，具体匹配逻辑由回复器自定义。可实现传统的指令模式bot，也可用于识别特定内容并执行相关操作。
          */
         command: boolean;
     };
     /**
+     * 是否回复群聊中来自自己的消息，可用于只有一个账号时的调试（回复自身消息时不触发）
+     * 
+     * 为`true`时，可能会被自身发出的回复消息触发死循环，关闭{@link BotConfig.triggers.name}与{@link BotConfig.triggers.command}可避免大部分情况
+     */
+    replySelf?: boolean;
+    /**
      * 是否回复私聊消息
      */
-    replyDM: boolean;
+    replyDM?: boolean;
     /**
      * 回复功能模式
      */
@@ -62,7 +70,7 @@ export interface BotConfig {
     /**
      * 提示文本
      */
-    hints: {
+    hints?: {
         /**
          * 回复器在此话题/节点不可用
          */
@@ -166,6 +174,7 @@ export const defaultConfig: Required<BotConfig> = {
         reply: true,
         command: false,
     },
+    replySelf: true,
     replyDM: true,
     messageReplyMode: MesageReplyMode.Derivative,
     messageProcessInterval: 200,
@@ -178,7 +187,7 @@ export const defaultConfig: Required<BotConfig> = {
         // 在 不是机器人据点 的 🍄 话题（节点）中，配置功能
         "219353468583456768": {
             name: "🍄",
-            repliers: {}
+            repliers: { all: {} }
         },
     } as TopicsConfig,
     // 提示文本

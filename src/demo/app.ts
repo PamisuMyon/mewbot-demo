@@ -1,5 +1,5 @@
 import { logger, LogLevel } from "mewbot";
-import { Bot, InitOptions } from "../bot/index.js";
+import { MewBot, InitOptions } from "../bot/index.js";
 import { ChatReplier } from "./repliers/chat-replier.js";
 import { CrashReplier } from "./repliers/crash-replier.js";
 import { DiceReplier } from "./repliers/dice-replier.js";
@@ -20,5 +20,5 @@ const options: InitOptions = {
         new ChatReplier(),
     ],
 };
-const bot = new Bot(options);
+const bot = new MewBot(options);
 bot.launch();

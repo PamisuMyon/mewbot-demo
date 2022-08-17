@@ -3,7 +3,7 @@ import { Spam } from "./spam.js";
 import { IStorage } from "./storage/istorage.js";
 
 /**
- * 用来避免短时间内被频繁刷屏，例如两个bot互相回复陷入死循环
+ * 防御机制，用来避免短时间内被频繁刷屏，例如两个bot互相回复陷入死循环
  */
 export class Defender {
 

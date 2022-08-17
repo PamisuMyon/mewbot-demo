@@ -3,7 +3,9 @@ import { IStorage } from "./istorage.js";
 import { Account, BotConfig, defaultConfig } from "../config.js";
 import { FileUtil } from "../commons/file-util.js";
 
-
+/**
+ * 文件存储实现
+ */
 export class FileStorage implements IStorage {
 
     protected _accountPath = './storage/account.json';

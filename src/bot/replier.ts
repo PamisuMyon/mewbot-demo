@@ -104,8 +104,11 @@ export abstract class Replier {
      * @param topic_id 话题id
      */
     protected getConfig(bot: IBot, topic_id: string) {
-        if (bot.config.topics[topic_id])
-            return bot.config.topics[topic_id].repliers[this.type];
+        if (bot.config.topics[topic_id]) {
+            if (bot.config.topics[topic_id].repliers[this.type])
+                return bot.config.topics[topic_id].repliers[this.type];
+            else return bot.config.topics[topic_id].repliers['all'];
+        }
     }
 
     /**

@@ -7,18 +7,45 @@ import { utils } from "./commons/utils.js";
 import { IStorage } from "./storage/istorage.js";
 import { FileStorage } from "./storage/file-storage.js";
 
-export class Bot implements IBot {
+export class MewBot implements IBot {
 
     protected _client = new MewClient();
+    /**
+     * MewClient
+     */
     get client(): MewClient { return this._client; }
     protected _storage!: IStorage;
+    /**
+     * 存储
+     */
     get storage(): IStorage { return this._storage; }
+    /**
+     * 当前配置项
+     */
     get config(): Required<BotConfig> { return this._storage.config; }
-    protected _msgQueue = new Array<Message>();
+    /**
+     * 自身信息
+     */
     protected _me!: User;
+    /**
+     * Mew ID、昵称、别名集合
+     */
     protected _names!: Array<string>;
+    /**
+     * 识别@ 
+     */
     protected _atRegex!: RegExp;
+    /**
+     * 防御机制
+     */
     protected _defender!: Defender;
+    /**
+     * 消息队列，接收到的消息将存入该队列，按处理间隔逐个处理
+     */
+    protected _msgQueue = new Array<Message>();
+    /**
+     * 回复器集合
+     */
     protected _repliers!: Array<Replier>;
     /**
      * 回复器挑选函数，内置实现参照 {@link Replier.pick01}（默认）, {@link Replier.pick} 
@@ -160,6 +187,8 @@ export class Bot implements IBot {
             // 群聊
             // 不在配置中的话题（节点），返回
             if (!Reflect.has(this.config.topics, msg.topic_id)) return;
+            // 配置不回复来自自身的消息，返回
+            if (!this.config.replySelf && msg._author.id == this._me.id) return;
             logger.debug(`Public Message: ${msg.content}`);
             // 非识别指令模式
             if (!this.config.triggers.command) {
@@ -262,7 +291,6 @@ export class Bot implements IBot {
         return;
     }
 
-    // TODO 记录发出的消息，用于忽略
     async reply(to: Message, message: OutgoingMessage, messageReplyMode?: MesageReplyMode) {
         message.replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
         return await this._client.sendMessage(to.topic_id, message);

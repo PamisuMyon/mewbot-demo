@@ -11,8 +11,9 @@ export const demoBotConfig: Required<BotConfig> = {
         alias: true,        // @别名
         mention: true,      // 预留未来可能会有的官方@功能
         reply: true,        // 回复bot的消息
-        command: true,     // 识别指令模式
+        command: false,     // 识别指令模式
     },
+    replySelf: true,     // 是否回复群聊中来自自己的消息 （回复自身消息不触发）
     replyDM: false,      // 是否回复私聊消息
     messageReplyMode: MesageReplyMode.None,   // 回复功能使用模式
     messageProcessInterval: 200,    // 消息处理间隔（毫喵）
@@ -27,6 +28,7 @@ export const demoBotConfig: Required<BotConfig> = {
         "100554577309229056": {
             name: "🐱",
             repliers: {
+                chat: {},
                 crash: {
                     defaultTimeout: 100,
                 },
@@ -55,24 +57,11 @@ export const demoBotConfig: Required<BotConfig> = {
                 },
             }
         },
+        // 在 🦴据点 的 🦴 话题（节点）中，配置所有功能
         "222154400563036161": {
             name: "🦴",
             repliers: {
-                chat: {},
-                crash: {
-                    defaultTimeout: 100,
-                },
-                dice: {},
-                help: {},
-                kudos: {},
-                mew: {},
-                picture: {
-                    spam: {
-                        interval: 60000,
-                        threshold: 3,
-                        cooldown: 120000,
-                    }
-                },
+                all: {}
             }
         },
     } as TopicsConfig,
@@ -95,20 +84,6 @@ export const demoBotConfig: Required<BotConfig> = {
 export const defaultTopicConfig: TopicConfig = {
     name: '',
     repliers: {
-        chat: {},
-        crash: {
-            defaultTimeout: 100,
-        },
-        dice: {},
-        help: {},
-        kudos: {},
-        mew: {},
-        picture: {
-            spam: {
-                interval: 60000,
-                threshold: 3,
-                cooldown: 120000,
-            }
-        },
+        all: {}
     }
 };
