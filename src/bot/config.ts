@@ -124,7 +124,17 @@ export interface TopicsConfig {
  * 话题/节点配置
  */
 export interface TopicConfig {
+    /**
+     * 话题/节点
+     */
     name: string;
+    /**
+     * 是否为静态配置，静态配置不可在运行中被移除
+     */
+    isStatic?: boolean;
+    /**
+     * 回复器配置
+     */
     repliers: { [type: string]: ReplierConfig };
 }
 
@@ -189,7 +199,7 @@ export const defaultConfig: Required<BotConfig> = {
             name: "🍄",
             repliers: { all: {} }
         },
-    } as TopicsConfig,
+    },
     // 提示文本
     hints: {
         replierUnavailable: [

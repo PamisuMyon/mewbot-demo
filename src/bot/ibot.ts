@@ -1,7 +1,7 @@
 import { Message, MewClient, OutgoingMessage, Result } from "mewbot";
 import { BotConfig, MesageReplyMode } from "./config.js";
 import { Replier, ReplierPickFunction } from "./replier.js";
-import { IStorage } from "./storage/istorage.js";
+import { IBotStorage } from "./storage/istorage.js";
 
 /**
  * Bot接口，用来定义Bot需要对外提供的接口
@@ -16,7 +16,7 @@ export interface IBot {
     /**
      * 存储
      */
-    get storage(): IStorage;
+    get storage(): IBotStorage;
 
     /**
      * 配置
@@ -66,7 +66,7 @@ export interface InitOptions {
     /**
      * 存储，默认为{@link FileStorage}
      */
-    storage?: IStorage;
+    storage?: IBotStorage;
     /**
      * 回复器列表，回复器位置越前，优先级越高
      */

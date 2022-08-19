@@ -1,5 +1,5 @@
 import { AuthMode, Message } from "mewbot";
-import { Replier, IBot, ReplyResult, utils, TestInfo, TestParams, NoConfidence, FullConfidence, Replied } from "../../bot/index.js";
+import { Replier, IBot, ReplyResult, Util, TestInfo, TestParams, NoConfidence, FullConfidence, Replied } from "../../bot/index.js";
 
 export class KudosReplier extends Replier {
 
@@ -27,7 +27,7 @@ export class KudosReplier extends Replier {
         const result = await this.addKudos(bot, 0);
         let reply: string;
         if (result.data) {
-            reply = `💪${utils.randomItem(this._roles)}🤜${utils.randomItem(this._effects)}${result.data.kudos}！`;
+            reply = `💪${Util.randomItem(this._roles)}🤜${Util.randomItem(this._effects)}${result.data.kudos}！`;
         } else {
             reply = '给猫猫加油失败😿';
         }

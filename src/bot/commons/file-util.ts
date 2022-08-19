@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { logger } from 'mewbot';
 import { promisify } from 'util';
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);
@@ -23,6 +24,22 @@ export class FileUtil {
     static async read(path: string) {
         if (await this.exists(path))
             return await readFile(path);
+    }
+
+    static async readJson(path: string, log = true) {
+        if (!(await FileUtil.exists(path))) {
+            if (log)
+                logger.error(`${path} not found.`);
+            return;
+        }
+        const raw = (await FileUtil.read(path))?.toString();
+        try {
+            return JSON.parse(raw!);
+        } catch(err) {
+            if (log)
+                logger.error(`${path}: incorrect format.`);
+        }
+        return;
     }
 
     static async write(path: string, data: string) {

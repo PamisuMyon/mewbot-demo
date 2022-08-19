@@ -1,6 +1,6 @@
 import { logger, LogLevel, Message } from "mewbot";
 import got from "got";
-import { MatryoshkaReplier, TestInfo, IBot, ReplyResult, utils, FileUtil, NetUtil, Replier, TestParams, FullConfidence, NoConfidence, Replied } from "../../bot/index.js";
+import { MatryoshkaReplier, TestInfo, IBot, ReplyResult, Util, FileUtil, NetUtil, Replier, TestParams, FullConfidence, NoConfidence, Replied } from "../../bot/index.js";
 
 export class PictureReplier extends MatryoshkaReplier {
     
@@ -30,7 +30,7 @@ abstract class PictureSubReplier extends Replier {
 
     override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
         const hint = await bot.replyText(msg, this._downloadingHint);
-        const file = await utils.randomItem(this._downloadFuncs)();
+        const file = await Util.randomItem(this._downloadFuncs)();
         let error;
         if (file) {
             const image = await bot.replyImage(msg, file);
@@ -43,7 +43,7 @@ abstract class PictureSubReplier extends Replier {
         } else {
             error = this._downloadErrorHint;
         }
-        await utils.sleep(100);
+        await Util.sleep(100);
         if (hint.data) {
             await bot.client.deleteMessage(hint.data.id);
         }

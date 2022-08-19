@@ -1,12 +1,12 @@
 import { logger, User } from "mewbot";
-import { IStorage } from "./istorage.js";
+import { IBotStorage } from "./istorage.js";
 import { Account, BotConfig, defaultConfig } from "../config.js";
 import { FileUtil } from "../commons/file-util.js";
 
 /**
  * 文件存储实现
  */
-export class FileStorage implements IStorage {
+export class FileStorage implements IBotStorage {
 
     protected _accountPath = './storage/account.json';
     protected _configPath = './storage/config.json';
@@ -16,24 +16,11 @@ export class FileStorage implements IStorage {
     protected _blockList!: Array<Partial<User>>;
     get blockList() { return this._blockList; }
 
-    protected async readFile(path: string, log = true) {
-        if (!(await FileUtil.exists(path))) {
-            if (log)
-                logger.error(`${path} not found.`);
-            return;
-        }
-        const raw = (await FileUtil.read(path))?.toString();
-        try {
-            return JSON.parse(raw!) as Account;
-        } catch(err) {
-            if (log)
-                logger.error(`${path}: incorrect format.`);
-        }
-        return;
+    async init(): Promise<void> {
     }
 
     async getAccount() {
-        const account = await this.readFile(this._accountPath);
+        const account = await FileUtil.readJson(this._accountPath) as Account;
         if (!account) return;
         if (account.token || (account.username && account.password)) {
             return account;
@@ -44,7 +31,7 @@ export class FileStorage implements IStorage {
     }
 
     async refreshConfig() {
-        this._config = await this.readFile(this._configPath, false) as Required<BotConfig>;
+        this._config = await FileUtil.readJson(this._configPath, false) as Required<BotConfig>;
         if (!this._config) {
             logger.info(`Read ${this._configPath} failed, using default config.`);
         }
@@ -56,7 +43,7 @@ export class FileStorage implements IStorage {
     }
 
     async refreshBlockList() {
-        this._blockList = await this.readFile(this._blockListPath, false) as Array<Partial<User>>;
+        this._blockList = await FileUtil.readJson(this._blockListPath, false) as Array<Partial<User>>;
         if (!this._blockList)
             this._blockList = [];
         return this._blockList;

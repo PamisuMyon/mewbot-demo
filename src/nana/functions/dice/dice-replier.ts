@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
-import { Replier, IBot, ReplyResult, Util, TestInfo, TestParams, NoConfidence, Replied, FullConfidence } from "../../bot/index.js";
+import { FullConfidence, HalfConfidence, IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { Util } from "../../commons/utils.js";
 
 /**
  * 骰娘的本职工作
@@ -8,19 +9,21 @@ export class DiceReplier extends Replier {
 
     type = 'dice';
 
-    protected _regex = /((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?/i;
+    protected _regexStrict = /^((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?$/i;
+    protected _regexLax = /((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?/i;
     protected _errorHints = [
         '指令输入错误，正在倾倒猫猫生发水...',
-        '指令输入错误，损失💰MewCoin×1',
-        '指令输入错误，猫猫逃走了！',
+        '指令输入错误，正在启动博士办公椅紧急弹射装置...',
+        '指令输入错误，您的开水壶已被炸毁。',
     ];
     protected _tooManyHints = [
-        '一次掷太多啦！',
+        '博士，一次掷太多对身体不好。',
     ];
 
     override async test(msg: Message, options: TestParams): Promise<TestInfo> {
         if (!msg.content) return NoConfidence;
-        if (this._regex.test(msg.content)) return FullConfidence;
+        if (this._regexStrict.test(msg.content)) return FullConfidence;
+        else if (this._regexLax.test(msg.content)) return HalfConfidence;
         else return NoConfidence;
     }
 
@@ -32,7 +35,7 @@ export class DiceReplier extends Replier {
         const lines = msg.content!.split('\n');
         const options = new Array<DiceOptions>();
         for (const line of lines) {
-            const r = this._regex.exec(line);
+            const r = this._regexLax.exec(line);
             if (!r) continue;
             const option: DiceOptions = {
                 add: Util.getNumber(r[2], 0),

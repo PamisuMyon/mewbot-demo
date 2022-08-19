@@ -2,9 +2,9 @@ import { Constants, logger, Message, MewClient, OutgoingMessage, User } from "me
 import { Defender } from "./defender.js";
 import { BotConfig, MesageReplyMode } from "./config.js";
 import { IBot, InitOptions } from "./ibot.js";
-import { Replier, ReplierPickFunction, TestInfo } from "./replier.js";
-import { utils } from "./commons/utils.js";
-import { IStorage } from "./storage/istorage.js";
+import { Replier, ReplierPickFunction, ReplyResult, TestInfo } from "./replier.js";
+import { Util } from "./commons/utils.js";
+import { IBotStorage } from "./storage/istorage.js";
 import { FileStorage } from "./storage/file-storage.js";
 
 export class MewBot implements IBot {
@@ -14,11 +14,11 @@ export class MewBot implements IBot {
      * MewClient
      */
     get client(): MewClient { return this._client; }
-    protected _storage!: IStorage;
+    protected _storage!: IBotStorage;
     /**
      * 存储
      */
-    get storage(): IStorage { return this._storage; }
+    get storage(): IBotStorage { return this._storage; }
     /**
      * 当前配置项
      */
@@ -34,7 +34,7 @@ export class MewBot implements IBot {
     /**
      * 识别@ 
      */
-    protected _atRegex!: RegExp;
+    protected _atRegex: RegExp | null = null;
     /**
      * 防御机制
      */
@@ -67,6 +67,9 @@ export class MewBot implements IBot {
      * 启动
      */
     async launch() {
+        // 初始化Storage
+        await this._storage.init();
+
         // 登录授权
         const account = await this._storage.getAccount();
         if (!account) return;
@@ -81,7 +84,10 @@ export class MewBot implements IBot {
                 logger.error('Login failed.');
                 return;
             }
-        } else return;
+        } else {
+            logger.error('No account, please check your account configuration.');
+            return;
+        }
 
         // 获取自身信息
         const me = await this._client.getMeInfo();
@@ -136,7 +142,10 @@ export class MewBot implements IBot {
             this._names.push(this._me.name);
         if (this.config.triggers.alias)
             this._names.push(...this.config.alias);
-        this._atRegex = new RegExp(`[@＠](${this._names.join('|')})`, 'g');
+        if (this._names.length == 0)
+            this._atRegex = null;
+        else
+            this._atRegex = new RegExp(`[@＠](${this._names.join('|')})`, 'g');
         logger.debug('@bot regex: ' + this._atRegex);
     }
 
@@ -197,7 +206,7 @@ export class MewBot implements IBot {
                     isTriggered = isReplyMe;
                 }
                 // @bot触发
-                if (!isTriggered && msg.content) {
+                if (!isTriggered && msg.content && this._atRegex) {
                     if (!isTriggered && msg.content.search(this._atRegex) != -1) {
                         isTriggered = true;
                         this._atRegex.lastIndex = 0;
@@ -209,11 +218,7 @@ export class MewBot implements IBot {
         // 挑选匹配的回复器
         let testInfo: TestInfo | undefined;
         if (isTriggered || this.config.triggers.command) {
-            // 去除可能存在的@bot
-            if (msg.content) {
-                msg.content = msg.content.replace(this._atRegex, '').trim();
-                this._atRegex.lastIndex = 0;
-            }
+            await this.onReplierPreTest(msg);
             /**
              * 默认的pickFunc参照 {@link Replier.pick01}, {@link Replier.pick} 
              */
@@ -223,27 +228,22 @@ export class MewBot implements IBot {
             });
         }
         if (!testInfo) return;
-        
+
         // 执行回复
-        const replier = utils.getElemSafe(this._repliers, testInfo.replierIndex!);
+        const replier = Util.getElemSafe(this._repliers, testInfo.replierIndex!);
         if (!replier) return;
-        logger.debug(`Reply message with replier: ${replier.type}`);
         const result = await replier.reply(this, msg, testInfo);
         if (result && result.success) {
             // ...额外处理逻辑
-            // 记录到Defender
-            this._defender.record(msg._author);
-            // 是否需要撤回
-            if (result.recall?.messageId) {
-                await utils.sleep(result.recall.delay);
-                await this.client.deleteMessage(result.recall.messageId);
-            }
+            await this.onReplierPostReply(msg, result);
             return;
+        } else {
+            logger.error(`Reply failed: ${replier.type}`);
         }
     }
 
     /**
-     * 判断是否是回复我的消息（暂时在表层实现，之后需要挪到mewbot中）
+     * 判断是否是回复我的消息
      * @param msg 消息
      */
     protected isReplyMe(msg: Message) {
@@ -257,22 +257,53 @@ export class MewBot implements IBot {
     }
 
     /**
-     * 生成 @对方 文本
-     * @param msgToReply 要回复的消息
+     * 对消息进行回复器测试前调用
+     * @param msg 消息
      */
-    protected getReplyTitle(msgToReply: Message) {
-        if (msgToReply._isDirect) return '';
+    protected async onReplierPreTest(msg: Message) {
+        // 去除可能存在的@bot，trim
+        if (msg.content) {
+            if (this._atRegex) {
+                msg.content = msg.content.replace(this._atRegex, '');
+                this._atRegex.lastIndex = 0;
+            }
+            msg.content = msg.content.trim();
+        }
+    }
+
+    /**
+     * 回复器成功回复消息后调用
+     * @param msg 消息
+     * @param result 回复结果
+     */
+    protected async onReplierPostReply(msg: Message, result: ReplyResult) {
+        // 记录到Defender
+        this._defender.record(msg._author);
+        // 是否需要撤回
+        if (result.recall?.messageId) {
+            await Util.sleep(result.recall.delay);
+            await this.client.deleteMessage(result.recall.messageId);
+        }
+    }
+
+    /**
+     * 生成 @对方 文本
+     * @param to 要回复的消息
+     */
+    protected getReplyTitle(to: Message) {
+        if (to._isDirect) return '';
         // 群聊中可以回复来自自己的消息
         // 为了避免陷入死循环，对方名称含有bot名时不能加上@对方名
-        if (this._names.indexOf(msgToReply._author.name) != -1
-            || msgToReply._author.name.search(this._atRegex) != -1) {
-            this._atRegex.lastIndex = 0;
-            if (this._names.indexOf(msgToReply._author.username) != -1)
+        if (this._names.indexOf(to._author.name) != -1
+            || (this._atRegex && to._author.name.search(this._atRegex) != -1)) {
+            if (this._atRegex)
+                this._atRegex.lastIndex = 0;
+            if (this._names.indexOf(to._author.username) != -1)
                 return '';
             else
-                return `@${msgToReply._author.username} `;
+                return `@${to._author.username} `;
         }
-        return `@${msgToReply._author.name} `;
+        return `@${to._author.name} `;
     }
 
     /**
@@ -297,7 +328,6 @@ export class MewBot implements IBot {
     }
 
     async replyText(to: Message, content: string, messageReplyMode?: MesageReplyMode) {
-        logger.debug(`To: ${to.content}  Reply Text: ${content}`);
         const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
         // 只要使用了回复功能，就无需加上@对方
         if (!replyToMessageId)

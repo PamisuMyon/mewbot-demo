@@ -5,13 +5,17 @@
   "type": "module",
   "scripts": {
     "bot": "node dist/demo/app.js",
-    "mock": "node dist/demo/mock.js"
+    "mock": "node dist/demo/mock.js",
+    "nana": "node dist/nana/app.js",
+    "nanamock": "node dist/nana/mock.js"
   },
   "author": "Pamisu",
   "license": "MIT",
   "dependencies": {
     "got": "^12.3.0",
-    "mewbot": "^1.0.3"
+    "hpagent": "^1.0.0",
+    "mewbot": "^1.0.3",
+    "mongodb": "^4.8.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.33.1",

@@ -4,7 +4,12 @@ import { Account, BotConfig } from "../config.js";
 /**
  * 存储接口
  */
-export interface IStorage {
+export interface IBotStorage {
+
+    /**
+     * 初始化，在{@link IBot.launch}时调用
+     */
+    init(): Promise<void>;
 
     getAccount(): Promise<Account | undefined>;
 

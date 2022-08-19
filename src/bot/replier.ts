@@ -1,18 +1,18 @@
 import { Message } from "mewbot";
 import { Spam } from "./spam.js";
 import { IBot } from "./ibot.js";
-import { utils } from "./commons/utils.js";
+import { Util } from "./commons/utils.js";
 
 /**
  * 回复器测试结果
  */
 export interface TestInfo {
     /**
-     * 置信度
+     * 置信度，默认的选择函数中需要确保该值在[0,1]区间
      */
     confidence: number;
     /**
-     * 额外数据
+     * 额外数据，在{@link Replier.test}中赋值，传递给{@link Replier.reply}使用
      */
     data?: any;
     /**
@@ -26,6 +26,7 @@ export interface TestInfo {
 }
 
 export const NoConfidence: TestInfo = { confidence: 0 };
+export const HalfConfidence: TestInfo = { confidence: .5 };
 export const FullConfidence: TestInfo = { confidence: 1 };
 
 /**
@@ -104,9 +105,10 @@ export abstract class Replier {
      * @param topic_id 话题id
      */
     protected getConfig(bot: IBot, topic_id: string) {
+        const type = this.type.split('/')[0];
         if (bot.config.topics[topic_id]) {
-            if (bot.config.topics[topic_id].repliers[this.type])
-                return bot.config.topics[topic_id].repliers[this.type];
+            if (bot.config.topics[topic_id].repliers[type])
+                return bot.config.topics[topic_id].repliers[type];
             else return bot.config.topics[topic_id].repliers['all'];
         }
     }
@@ -122,7 +124,7 @@ export abstract class Replier {
         if (!conf) {
             if (shouldReply) {
                 // 回复提示文本
-                await bot.replyText(msg, utils.randomItem(bot.config.hints.replierUnavailable));
+                await bot.replyText(msg, Util.randomItem(bot.config.hints.replierUnavailable));
             }
             return false;
         }
@@ -153,6 +155,12 @@ export abstract class Replier {
             spam.record(targetId);
     }
 
+    /**
+     * 回复器挑选函数，挑选置信度为1且优先级最高的回复器
+     * @param repliers 回复器集合
+     * @param msg 消息
+     * @param params 测试参数
+     */
     static async pick01(repliers: Replier[], msg: Message, params: TestParams) {
         for (let i = 0; i < repliers.length; i++) {
             const t = await repliers[i].test(msg, params);
@@ -164,6 +172,12 @@ export abstract class Replier {
         return;
     }
 
+    /**
+     * 回复器挑选函数，挑选置信度最高且优先级最高的回复器
+     * @param repliers 回复器集合
+     * @param msg 消息
+     * @param params 测试参数
+     */
     static async pick(repliers: Replier[], msg: Message, params: TestParams) {
         const tests = new Array<TestInfo>();
         for (let i = 0; i < repliers.length; i++) {
@@ -179,6 +193,34 @@ export abstract class Replier {
             return tests[0];
         }
         return;
+    }
+
+    /**
+     * 回复器挑选函数，挑选置信度为1且优先级最高的回复器，如果没有1，则从最高置信度的回复器中随机选取一个
+     * @param repliers 回复器集合
+     * @param msg 消息
+     * @param params 测试参数
+     */
+    static async pick01Fuzzy(repliers: Replier[], msg: Message, params: TestParams) {
+        const tests = new Array<TestInfo>();
+        for (let i = 0; i < repliers.length; i++) {
+            const t = await repliers[i].test(msg, params);
+            if (t.confidence > 0) {
+                t.replierIndex = i;
+                if (t.confidence == 1)
+                    return t;
+                tests.push(t);
+            }
+        }
+        if (tests.length != 0) {
+            tests.sort((a, b) => b.confidence - a.confidence);
+            let range = 1;
+            for(; range < tests.length; ++range) {
+                if (tests[0].confidence != tests[range].confidence)
+                    break;
+            }
+            return tests[Util.randomInt(0, range - 1)];
+        }
     }
 
 }
@@ -225,7 +267,7 @@ export abstract class MatryoshkaReplier extends Replier {
                 await bot.replyText(msg, '指令冷却中，请稍后再试');
                 return Replied;
             } else {
-                const hint = await bot.replyText(msg, `指令冷却中，请${utils.getTimeCounterText(spamCheck.remain! / 1000)}后再试`);
+                const hint = await bot.replyText(msg, `指令冷却中，请${Util.getTimeCounterText(spamCheck.remain! / 1000)}后再试`);
                 if (hint.data) {
                     return {
                         success: true,

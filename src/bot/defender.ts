@@ -1,6 +1,6 @@
 import { logger, User } from "mewbot";
 import { Spam } from "./spam.js";
-import { IStorage } from "./storage/istorage.js";
+import { IBotStorage } from "./storage/istorage.js";
 
 /**
  * 防御机制，用来避免短时间内被频繁刷屏，例如两个bot互相回复陷入死循环
@@ -8,13 +8,13 @@ import { IStorage } from "./storage/istorage.js";
 export class Defender {
 
     protected _spam: Spam;
-    protected _storage!: IStorage;
+    protected _storage!: IBotStorage;
 
     /**
      * @param interval 连击生效间隔
      * @param threshold 防御连击阈值
      */
-    constructor(storage: IStorage, interval = 1000, threshold = 10) {
+    constructor(storage: IBotStorage, interval = 1000, threshold = 10) {
         this._storage = storage;
         this._spam = new Spam(interval, threshold);
     }

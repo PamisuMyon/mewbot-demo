@@ -1,4 +1,4 @@
-export class utils {
+export class Util {
 
     static randomFloat(min: number, max: number) {
         return Math.random() * (max - min) + min;
@@ -43,6 +43,27 @@ export class utils {
         if (!arr) return;
         if (index < 0 || index >= arr.length) return;
         return arr[index];
+    }
+
+    static removeElem<T>(array: T[], elem: T) {
+        const index = array.indexOf(elem);
+        if (index > -1) {
+            array.splice(index, 1);
+        }
+    }
+
+    static pushUnique<T>(a: T[], b: T) {
+        if (a.indexOf(b) == -1) {
+            a.push(b);
+        }
+    }
+
+    static pushAllUnique<T>(a: T[], b: T[]) {
+        for (const item of b) {
+            if (a.indexOf(item) == -1) {
+                a.push(item);
+            }
+        }
     }
     
 }

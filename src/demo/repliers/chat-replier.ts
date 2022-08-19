@@ -1,5 +1,5 @@
 import { Message } from "mewbot";
-import { Replier, IBot, ReplyResult, utils, TestInfo, TestParams, NoConfidence, FullConfidence, Replied } from "../../bot/index.js";
+import { Replier, IBot, ReplyResult, Util, TestInfo, TestParams, NoConfidence, FullConfidence, Replied } from "../../bot/index.js";
 
 
 export class ChatReplier extends Replier {
@@ -27,7 +27,7 @@ export class ChatReplier extends Replier {
         if (r) {
             content = new Array(r.length + 1).join('🥕');
         } else {
-            content = utils.randomItem(bot.config.hints.fallback);
+            content = Util.randomItem(bot.config.hints.fallback);
         }
         await bot.replyText(msg, content);
         return Replied;
