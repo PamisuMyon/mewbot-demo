@@ -1,7 +1,7 @@
 /**
  * bot配置项，默认配置参考 {@link defaultConfig}
  * 
- * 大部分配置支持在bot运行时动态刷新，参考{@link IStorage} {@link FileStorage}
+ * 大部分配置支持在bot运行时动态刷新，参考{@link IBotStorage} {@link FileStorage}
  */
 export interface BotConfig {
     /**
@@ -100,15 +100,15 @@ export interface BotConfig {
  */
 export enum MesageReplyMode {
     /**
-     * 不做任何操作（不使用回复功能）
+     * `none` 不做任何操作（不使用回复功能）
      */
     None = 'none',
     /**
-     * 总是使用回复功能（有消息id可以回复时）
+     * `always` 总是使用回复功能（有消息id可以回复时）
      */
     Always = 'always',
     /**
-     * 仅在衍生话题中使用回复功能，即回复bot的消息、回复他人的消息但触发bot
+     * `derivative` 仅在衍生话题中使用回复功能，即回复bot的消息、回复他人的消息但触发bot
      */
     Derivative = 'derivative',
 }
@@ -133,7 +133,7 @@ export interface TopicConfig {
      */
     isStatic?: boolean;
     /**
-     * 回复器配置
+     * 回复器配置，`key`对应{@link Replier.type}，为`all`时表示启用所有回复器
      */
     repliers: { [type: string]: ReplierConfig };
 }

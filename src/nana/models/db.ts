@@ -103,3 +103,13 @@ export class Col<TSchema extends Document = Document> {
     }
 
 }
+
+export class CachedCol<TSchema extends Document = Document> extends Col<TSchema> {
+
+    protected _cache: WithId<TSchema>[] = [];
+
+    async refresh() {
+        this._cache = await this.find().toArray();
+    }
+
+}

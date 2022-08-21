@@ -6,7 +6,7 @@ import { promisify } from 'util';
 import { logger, LogLevel } from "mewbot";
 import { FileUtil, Util } from "../../../bot/index.js";
 import { Character, ICharacter } from '../../models/ak/character.js';
-import { MiscConfig } from '../../models/config.js';
+import { AkMisc } from '../../models/ak/ak-misc.js';
 const pipeline = promisify(stream.pipeline);
 
 const root = 'https://cdn.jsdelivr.net/gh/Kengxxiao/ArknightsGameData/zh_CN/gamedata/';
@@ -121,8 +121,8 @@ export class AkDataImporter {
         const result = await Character.upsertMany(['charID'], chars);
         logger.log(`Characters updated, Upsert: ${result.upsertedCount} Modified: ${result.modifiedCount}`);
 
-        // tag导入configs
-        await MiscConfig.upsertOneByName('tags', tags);
+        // tag导入ak-misc
+        await AkMisc.upsertOneByName('tags', tags);
         logger.log('Character tags updated.');
     }
 }

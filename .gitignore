@@ -109,5 +109,5 @@ dist
 
 dist/
 cache/
-/storage/
-account.json
+/storage/*
+!/storage/*.sample.json

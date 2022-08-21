@@ -3,6 +3,16 @@ import { Util as LibUtils } from "../../bot/index.js";
 
 export class Util extends LibUtils {
 
+    static stringFormat(str: string, ...args: string[]) {
+        if (args.length == 0)
+            return str;
+        for (let i = 0; i < args.length; i++) {
+            const re = new RegExp('\\{' + i + '\\}', 'gm');
+            str = str.replace(re, args[i]);
+        }
+        return str;
+    }
+
     /**
      * 返回items中元素的所有组合情况
      * 

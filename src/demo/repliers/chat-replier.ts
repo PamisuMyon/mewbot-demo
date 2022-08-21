@@ -13,7 +13,7 @@ export class ChatReplier extends Replier {
         return FullConfidence;
     }
 
-    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         if (!msg.content) {
             bot.replyText(msg, `你好，${msg._author.name}`);
             return Replied;

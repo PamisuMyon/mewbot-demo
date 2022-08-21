@@ -20,16 +20,14 @@ export class OperatorReplier extends Replier {
         if (this.isFuzzy) {
             char = await Character.findFuzzyOne('name', msg.content);
         } else {
-            console.log('Finding' + msg.content);
             char = await Character.findOne({ name: msg.content });
         }
-        console.dir(char);
         if (char) {
             return { confidence: this.isFuzzy? .9 : 1, data: char };
         } else return NoConfidence;
     }
 
-    async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
+    async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         if (!test.data) return ReplyFailed;
         const char = test.data as ICharacter;
         let reply = '';

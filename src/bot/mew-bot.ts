@@ -7,6 +7,9 @@ import { Util } from "./commons/utils.js";
 import { IBotStorage } from "./storage/istorage.js";
 import { FileStorage } from "./storage/file-storage.js";
 
+/**
+ * MewBot
+ */
 export class MewBot implements IBot {
 
     protected _client = new MewClient();

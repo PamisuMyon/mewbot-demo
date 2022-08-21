@@ -31,9 +31,12 @@ export class MongoStorage implements IBotStorage {
     }
 
     async refreshConfig(): Promise<Required<BotConfig>> {
-        const config = await MiscConfig.findOne({ name: 'botConfig' });
+        const config = await MiscConfig.findOneByName<BotConfig>('botConfig');
         if (config) {
-            this._botConfig = config.value;
+            this._botConfig =  {
+                ...defaultNanaBotConfig,
+                ...config,
+            };
         } else {
             logger.warn('No BotConfig set, using defaults');
             this._botConfig = defaultNanaBotConfig;

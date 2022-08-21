@@ -28,7 +28,7 @@ abstract class PictureSubReplier extends Replier {
         return b? FullConfidence : NoConfidence;
     }
 
-    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         const hint = await bot.replyText(msg, this._downloadingHint);
         const file = await Util.randomItem(this._downloadFuncs)();
         let error;

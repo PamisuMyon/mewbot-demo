@@ -13,7 +13,7 @@ export class CrashReplier extends Replier {
         else return NoConfidence;
     }
 
-    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         if (!await this.checkAvailable(bot, msg)) {
             return Replied;
         }

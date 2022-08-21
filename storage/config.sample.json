@@ -1,0 +1,42 @@
+{
+    "alias": [
+        "bot",
+        "萝卜",
+        "🤖"
+    ],
+    "triggers": {
+        "username": true,
+        "name": false,
+        "alias": true,
+        "mention": true,
+        "reply": true,
+        "command": false
+    },
+    "replySelf": true,
+    "replyDM": true,
+    "messageReplyMode": "derivative",
+    "messageProcessInterval": 200,
+    "nodes": [
+        "100554577263091712"
+    ],
+    "topics": {
+        "219353468583456768": {
+            "name": "🍄",
+            "repliers": {
+                "all": {}
+            }
+        }
+    },
+    "hints": {
+        "replierUnavailable": [
+            "对不起，本节点不支持这个功能😿"
+        ],
+        "fallback": [
+            "我不知道怎么跟你说，因为我只是一个机器人"
+        ]
+    },
+    "defender": {
+        "interval": 1500,
+        "threshold": 10
+    }
+}

@@ -77,7 +77,7 @@ export abstract class Replier {
      * @param bot bot 
      * @param msg 待回复的消息
      */
-    abstract reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined>;
+    abstract reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult>;
 
     /**
      * 初始化，在bot启动及配置刷新时被调用
@@ -258,7 +258,7 @@ export abstract class MatryoshkaReplier extends Replier {
     override async reply(bot: IBot, msg: Message, test: TestInfo) {
         // 功能在此话题是否可用
         if (!await this.checkAvailable(bot, msg))
-            return;
+            return Replied;
 
         // 是否冷却中
         const spamCheck = this.checkSpam(msg.topic_id, msg.topic_id);

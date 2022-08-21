@@ -2,7 +2,7 @@ import { Message, logger, LogLevel, OutgoingMessage, Result } from 'mewbot';
 import * as readline from 'readline';
 import { MesageReplyMode } from '../bot/index.js';
 import { AkDataImporter } from './functions/gamedata/ak-data-importer.js';
-import { NanaBot } from './nanabot.js';
+import { NanaBot } from './nana-bot.js';
 
 class MockBot extends NanaBot {
     

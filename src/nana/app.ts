@@ -1,4 +1,4 @@
-import { NanaBot } from "./nanabot.js";
+import { NanaBot } from "./nana-bot.js";
 
 (async () => {
     const nana = new NanaBot();

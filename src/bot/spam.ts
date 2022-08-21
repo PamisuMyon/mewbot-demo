@@ -89,17 +89,24 @@ export class Spam {
     record(id: string) {
         const time = new Date().getTime();
         if (!this._infos[id]) {
-            this._infos[id] = {
+            const info = {
                 id,
                 cmdCount: 1,
                 cmdTime: time,
                 cooldownTime: -1,
                 failedTimes: 0,
             };
+            this._infos[id] = info;
+            // 一次即触发冷却情况
+            if (this._threshold <= 1) {
+                info.cooldownTime = time + this._cooldown;
+                info.cmdCount = 0;
+                info.failedTimes = 0;
+            }
         } else {
             const info = this._infos[id];
             // 如果距离上一次指令时间没有超过连击间隔，则累计指令数
-            if (info.cmdTime >= time - this._interval) {
+            if (info.cmdTime >= time - this._interval || this._threshold <= 1) {
                 info.cmdCount++;
                 // 如果连击数达到阈值，进入冷却
                 if (info.cmdCount >= this._threshold) {

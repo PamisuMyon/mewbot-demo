@@ -19,7 +19,14 @@ export class MiscConfigCol extends Col<IMiscConfig> {
 
 export const MiscConfig = new MiscConfigCol('configs');
 
-export const defaultNanaBotConfig: Required<BotConfig> = {
+export interface NanaBotConfig extends BotConfig {
+    /**
+     * 安静时长
+     */
+    silenceDuration: number;
+}
+
+export const defaultNanaBotConfig: Required<NanaBotConfig> = {
     alias: [],
     triggers: {
         username: true,
@@ -59,4 +66,5 @@ export const defaultNanaBotConfig: Required<BotConfig> = {
         interval: 1500,
         threshold: 10, // 防御连击阈值，达到此阈值时将对方加入屏蔽列表
     },
+    silenceDuration: 600000,
 };

@@ -1,6 +1,7 @@
 import { Message } from "mewbot";
 import { FullConfidence, HalfConfidence, IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
 import { Util } from "../../commons/utils.js";
+import { Sentence } from "../../models/sentence.js";
 
 /**
  * 骰娘的本职工作
@@ -11,14 +12,6 @@ export class DiceReplier extends Replier {
 
     protected _regexStrict = /^((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?$/i;
     protected _regexLax = /((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?/i;
-    protected _errorHints = [
-        '指令输入错误，正在倾倒猫猫生发水...',
-        '指令输入错误，正在启动博士办公椅紧急弹射装置...',
-        '指令输入错误，您的开水壶已被炸毁。',
-    ];
-    protected _tooManyHints = [
-        '博士，一次掷太多对身体不好。',
-    ];
 
     override async test(msg: Message, options: TestParams): Promise<TestInfo> {
         if (!msg.content) return NoConfidence;
@@ -27,7 +20,7 @@ export class DiceReplier extends Replier {
         else return NoConfidence;
     }
 
-    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult | undefined> {
+    override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         if (!await this.checkAvailable(bot, msg)) {
             return Replied;
         }
@@ -46,7 +39,7 @@ export class DiceReplier extends Replier {
             };
             options.push(option);
         }
-        let reply = Dice.rolls(options, this._errorHints, this._tooManyHints);
+        let reply = Dice.rolls(options, Sentence.get('commandError')!, Sentence.get('diceTooMany')!);
         if (!msg._isDirect && reply.indexOf('\n') != -1) {
             reply = '\n' + reply;
         }
