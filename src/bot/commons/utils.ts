@@ -39,6 +39,10 @@ export class Util {
         }
     }
 
+    static isArrEmpty(arr?: any[]) {
+        return !arr || arr.length == 0;
+    }
+
     static getElemSafe<T>(arr: T[], index: number) {
         if (!arr) return;
         if (index < 0 || index >= arr.length) return;

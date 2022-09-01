@@ -1,3 +1,4 @@
+import { logger } from "mewbot";
 import { Util } from "../../bot/index.js";
 import { CachedCol } from "./db.js";
 
@@ -13,6 +14,7 @@ export class SentenceCol extends CachedCol<ISentence> {
             if (item.name == name)
                 return item.contents;
         }
+        logger.error(`No sentence matched ${name}, please check your sentence collection.`);
         return;
     }
 
@@ -20,6 +22,7 @@ export class SentenceCol extends CachedCol<ISentence> {
         const contents = this.get(name);
         if (contents)
             return Util.randomItem(contents);
+        logger.error(`No sentence matched ${name}, please check your sentence collection.`);
         return;
     }
 

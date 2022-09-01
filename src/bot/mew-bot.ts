@@ -66,6 +66,7 @@ export class MewBot implements IBot {
         this._pickFunc = opt.replierPickFunction? opt.replierPickFunction : Replier.pick01;
     }
 
+
     /**
      * 启动
      */
@@ -330,16 +331,28 @@ export class MewBot implements IBot {
         return await this._client.sendMessage(to.topic_id, message);
     }
 
-    async replyText(to: Message, content: string, messageReplyMode?: MesageReplyMode) {
+    async replyText(to: Message, content: string, messageReplyMode?: MesageReplyMode, addReplyTitle = true) {
         const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
         // 只要使用了回复功能，就无需加上@对方
-        if (!replyToMessageId)
+        if (!replyToMessageId && addReplyTitle)
             content = this.getReplyTitle(to) + content;
         if (content.length > Constants.MaxMessageContentLength) {
             return (await this._client.sendTextMessageSafely(to.topic_id, content, replyToMessageId))[0];
         } else {
             return await this._client.sendTextMessage(to.topic_id, content, replyToMessageId);
         }
+    }
+
+    async replyStamp(to: Message, stampId: string, messageReplyMode?: MesageReplyMode) {
+        logger.debug(`To: ${to.content}  Reply Stamp: ${stampId}`);
+        const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
+        return await this._client.sendStampMessage(to.topic_id, stampId, replyToMessageId);
+    }
+
+    async replyThought(to: Message, thoughtId: string, messageReplyMode?: MesageReplyMode) {
+        logger.debug(`To: ${to.content}  Reply Thought: ${thoughtId}`);
+        const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
+        return await this._client.sendThoughtMessage(to.topic_id, thoughtId, replyToMessageId);
     }
 
     async replyImage(to: Message, imageFile: string, messageReplyMode?: MesageReplyMode) {

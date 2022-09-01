@@ -264,10 +264,10 @@ export abstract class MatryoshkaReplier extends Replier {
         const spamCheck = this.checkSpam(msg.topic_id, msg.topic_id);
         if (!spamCheck.pass) {
             if (spamCheck.failedTimes! <= 1) {
-                await bot.replyText(msg, '指令冷却中，请稍后再试');
+                await bot.replyText(msg, this.getCooldownHint());
                 return Replied;
             } else {
-                const hint = await bot.replyText(msg, `指令冷却中，请${Util.getTimeCounterText(spamCheck.remain! / 1000)}后再试`);
+                const hint = await bot.replyText(msg, this.getCooldownHint(spamCheck.remain! / 1000));
                 if (hint.data) {
                     return {
                         success: true,
@@ -282,7 +282,7 @@ export abstract class MatryoshkaReplier extends Replier {
         // 执行子回复器
         const info = test as MatryoshkaTestInfo;
         const replier = this._children[info.subReplierIndex as number];
-        const result = await replier.reply(bot, msg, info.data);
+        const result = await replier.reply(bot, msg, info);
 
         if (result?.success) {
             // 记录Spam
@@ -290,6 +290,14 @@ export abstract class MatryoshkaReplier extends Replier {
         }
 
         return result;
+    }
+
+    getCooldownHint(remainTime?: number) {
+        if (remainTime) {
+            return `指令冷却中，请${Util.getTimeCounterText(remainTime)}后再试`;
+        } else {
+            return '指令冷却中，请稍后再试';
+        }
     }
 
 }

@@ -34,7 +34,7 @@ export interface IBot {
     refresh(): Promise<void>;
 
     /**
-     * 回复消息
+     * 回复
      * @param to 待回复消息
      * @param message 消息
      * @param messageReplyMode 回复模式，默认使用配置值
@@ -42,15 +42,32 @@ export interface IBot {
     reply(to: Message, message: OutgoingMessage, messageReplyMode?: MesageReplyMode): Promise<Result<Message>>;
 
     /**
-     * 回复文本消息
+     * 回复文本
      * @param to 待回复消息
      * @param reply 文本
      * @param messageReplyMode 回复模式，默认使用配置值
+     * @param addReplyTitle 是否加上@对方
      */
-    replyText(to: Message, reply: string, messageReplyMode?: MesageReplyMode): Promise<Result<Message>>;
+    replyText(to: Message, reply: string, messageReplyMode?: MesageReplyMode, addReplyTitle?: boolean): Promise<Result<Message>>;
 
     /**
-     * 回复图片消息
+     * 回复表情
+     * @param to 待回复消息
+     * @param stampId 表情
+     * @param messageReplyMode 回复模式，默认使用配置值
+     */
+    replyStamp(to: Message, stampId: string, messageReplyMode?: MesageReplyMode): Promise<Result<Message>>;
+
+    /**
+     * 转发想法
+     * @param to 待回复消息
+     * @param thoughtId 想法
+     * @param messageReplyMode 回复模式，默认使用配置值
+     */
+    replyThought(to: Message, thoughtId: string, messageReplyMode?: MesageReplyMode): Promise<Result<Message>>;
+
+    /**
+     * 回复图片
      * @param to 待回复消息
      * @param imageFile 图片文件路径
      * @param messageReplyMode 回复模式，默认使用配置值

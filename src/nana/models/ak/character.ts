@@ -1,6 +1,26 @@
 import { Col } from "../db.js";
 
-export const Character = new Col<ICharacter>('characters');
+export class CharacterCol extends Col<ICharacter> {
+
+    async findByRecruit(rarity: number, position: string, profession: string, tags: string[]) {
+        const query: any = { canRecruit: true };
+        if (rarity != null) {
+            query.rarity = rarity;
+        }
+        if (position != null) {
+            query.position = position;
+        }
+        if (profession != null) {
+            query.profession = profession;
+        }
+        if (tags && tags.length > 0) {
+            query.tagList = { $all: tags };
+        }
+        return await this.col.find(query).toArray();
+    }
+}
+
+export const Character = new CharacterCol('characters');
 
 export interface ICharacter {
     name: string;

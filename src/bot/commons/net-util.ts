@@ -9,11 +9,16 @@ export class NetUtil {
 
     static pipeline = promisify(stream.pipeline);
 
-    static async download(url: string, filePath: string) {
+    static async download(url: string, filePath: string, timeout = 360000) {
         try {
             FileUtil.create(filePath);
             logger.debug('Start downloading of file: ' + url);
-            await this.pipeline(got.stream(url), fs.createWriteStream(filePath));
+            const options = { 
+                timeout: { 
+                    request: timeout 
+                } 
+            };
+            await this.pipeline(got.stream(url, options), fs.createWriteStream(filePath));
             logger.debug('File downloaded: ' + filePath);
             return filePath;
         } catch (err) {
