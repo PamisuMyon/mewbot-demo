@@ -5,7 +5,7 @@ import { Character, ICharacter } from "../../models/ak/character.js";
 
 export class OperatorReplier extends Replier {
 
-    type = 'wiki/character';
+    type = 'wiki';
     isFuzzy = false;
 
     constructor(isFuzzy: boolean) {
@@ -15,7 +15,6 @@ export class OperatorReplier extends Replier {
 
     async test(msg: Message, options: TestParams): Promise<TestInfo> {
         if (!msg.content) return NoConfidence;
-        if (options.isCommandMode) return NoConfidence; // 暂不支持指令模式
         let char;
         if (this.isFuzzy) {
             char = await Character.findFuzzyOne('name', msg.content);
@@ -28,7 +27,6 @@ export class OperatorReplier extends Replier {
     }
 
     async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
-        if (!test.data) return ReplyFailed;
         const char = test.data as ICharacter;
         let reply = '';
         if (char.itemDesc) {

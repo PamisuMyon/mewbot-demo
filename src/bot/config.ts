@@ -125,7 +125,11 @@ export interface TopicsConfig {
  */
 export interface TopicConfig {
     /**
-     * 话题/节点
+     * 话题/节点id
+     */
+    id: string;
+    /**
+     * 话题/节点名称
      */
     name: string;
     /**
@@ -196,6 +200,7 @@ export const defaultConfig: Required<BotConfig> = {
     topics: {
         // 在 不是机器人据点 的 🍄 话题（节点）中，配置功能
         "219353468583456768": {
+            id: "219353468583456768",
             name: "🍄",
             repliers: { all: {} }
         },

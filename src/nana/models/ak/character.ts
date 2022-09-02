@@ -18,6 +18,18 @@ export class CharacterCol extends Col<ICharacter> {
         }
         return await this.col.find(query).toArray();
     }
+
+    async findByNationGroupTeamId(id: string) {
+        const results = await this.col.find({ 
+            $or:[ 
+                {nationId: id}, 
+                {groupId: id},
+                {teamId: id},
+            ]
+        }).toArray();
+        return results;
+    }
+    
 }
 
 export const Character = new CharacterCol('characters');

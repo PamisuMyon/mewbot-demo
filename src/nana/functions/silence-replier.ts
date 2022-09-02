@@ -14,35 +14,26 @@ export class SilenceReplier extends Replier {
     type = 'silence';
 
     protected _regex = /^安静$/;
-    protected _silenceSpams!: { [topicId: string]: Spam };  // hard-code
+    protected _silenceSpam!: Spam;
     protected _silenceDuration!: number;
 
-    override init(bot: IBot) {
-        super.init(bot);
-        this._silenceSpams = {};
+    override async init(bot: IBot) {
+        await super.init(bot);
         this._silenceDuration = (bot.storage.config as NanaBotConfig).silenceDuration;
+        this._silenceSpam = new Spam(0, 1, this._silenceDuration);
     }
 
     async test(msg: Message, options: TestParams): Promise<TestInfo> {
         // 检测生效
-        if (this._silenceSpams[msg.topic_id]) {
-            const check = this._silenceSpams[msg.topic_id].check(msg.topic_id);
-            if (!check.pass) {
-                return FullConfidence;
-            }
+        const check = this._silenceSpam.check(msg.topic_id);
+        if (!check.pass) {
+            return FullConfidence;
         }
 
         if (!msg.content) return NoConfidence;
         // 检测指令
         if (this._regex.test(msg.content)) {
-            let spam;
-            if (this._silenceSpams[msg.topic_id]) {
-                spam = this._silenceSpams[msg.topic_id];
-            } else {
-                spam = new Spam(0, 1, this._silenceDuration);
-                this._silenceSpams[msg.topic_id] = spam;
-            }
-            spam.record(msg.topic_id);
+            this._silenceSpam.record(msg.topic_id);
             return { confidence: 1, data: 1};
         }
         return NoConfidence;

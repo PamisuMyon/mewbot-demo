@@ -1,6 +1,7 @@
 import { Message } from "mewbot";
 import { FullConfidence, HalfConfidence, IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
 import { Util } from "../../commons/utils.js";
+import { MiscConfig } from "../../models/config.js";
 import { Sentence } from "../../models/sentence.js";
 
 /**
@@ -10,13 +11,25 @@ export class DiceReplier extends Replier {
 
     type = 'dice';
 
-    protected _regexStrict = /^((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?$/i;
+    // protected _regexStrict = /^((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?$/i;
     protected _regexLax = /((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?/i;
+    protected _ignores: RegExp[] = [];
+
+    async init() {
+        const ignores = await MiscConfig.findOneByName<string[]>('diceIgnores');
+        for (const item of ignores) {
+            this._ignores.push(new RegExp(item, 'i'));
+        }
+    }
 
     override async test(msg: Message, options: TestParams): Promise<TestInfo> {
         if (!msg.content) return NoConfidence;
-        if (this._regexStrict.test(msg.content)) return FullConfidence;
-        else if (this._regexLax.test(msg.content)) return HalfConfidence;
+        // if (this._regexStrict.test(msg.content)) return FullConfidence;
+        // else if (this._regexLax.test(msg.content)) return HalfConfidence;
+        for (const item of this._ignores) {
+            if (item.test(msg.content)) return NoConfidence;
+        }
+        if (this._regexLax.test(msg.content)) return FullConfidence;
         else return NoConfidence;
     }
 

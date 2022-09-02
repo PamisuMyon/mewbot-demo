@@ -1,7 +1,7 @@
 import { Constants, logger, Message, MewClient, OutgoingMessage, User } from "mewbot";
 import { Defender } from "./defender.js";
 import { BotConfig, MesageReplyMode } from "./config.js";
-import { IBot, InitOptions } from "./ibot.js";
+import { IBot, InitOptions, IServerImageDao } from "./ibot.js";
 import { Replier, ReplierPickFunction, ReplyResult, TestInfo } from "./replier.js";
 import { Util } from "./commons/utils.js";
 import { IBotStorage } from "./storage/istorage.js";
@@ -122,6 +122,7 @@ export class MewBot implements IBot {
      * 利用此方法可在bot运行时动态变更配置
      */
     async refresh() {
+        logger.debug('MewBot Refreshing...');
         // 刷新配置项
         await this._storage.refreshConfig();
         // 刷新屏蔽列表
@@ -131,8 +132,8 @@ export class MewBot implements IBot {
         // 初始化防御机制
         this._defender = new Defender(this._storage, this.config.defender.interval, this.config.defender.threshold);
         // 初始化所有回复器
-        this.initRepliers();
-        logger.debug('Refreshed.');
+        await this.initRepliers();
+        logger.debug('MewBot Refreshed.');
     }
 
     /**
@@ -156,9 +157,9 @@ export class MewBot implements IBot {
     /**
      * 初始化所有回复器
      */
-    protected initRepliers() {
+    protected async initRepliers() {
         for (const replier of this._repliers) {
-            replier.init(this);
+            await replier.init(this);
         }
     }
 
@@ -359,6 +360,33 @@ export class MewBot implements IBot {
         logger.debug(`To: ${to.content}  Reply Image: ${imageFile}`);
         const replyToMessageId = this.getReplyMessageId(to, messageReplyMode);
         return await this._client.sendImageMessage(to.topic_id, imageFile, replyToMessageId);
+    }
+
+    async replyImageWithCache(to: Message, imageFile: string, dao: IServerImageDao, messageReplyMode?: MesageReplyMode) {
+        logger.debug(`To: ${to.content}  Reply Image With Cache: ${imageFile}`);
+        const serverImage = await dao.findByFileName(imageFile);
+        let info;
+        if (serverImage && serverImage.info) {
+            const isAlive = await Util.isUrlAlive(serverImage.info.url);
+            if (isAlive) {
+                info = serverImage.info;
+            } else {
+                // 图片已失效，移除记录
+                await dao.deleteByFileName(imageFile);
+            }
+        }
+        if (!info) {
+            // 上传图片
+            const result = await this._client.uploadImage(imageFile);
+            // 记录
+            if (result.data && result.data.id) {
+                info = result.data;
+                await dao.insertOne({ fileName: imageFile, info });
+            } else {
+                return { error: result.error };
+            }
+        }
+        return await this.reply(to, { media: [info.id] }, messageReplyMode);
     }
 
 }

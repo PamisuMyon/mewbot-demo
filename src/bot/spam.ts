@@ -121,4 +121,17 @@ export class Spam {
             info.cmdTime = time;
         }
     }
+
+    /**
+     * 重置Spam
+     * @param id 任意id，例如用户id，话题/节点id等
+     */
+    reset(id: string) {
+        if (this._infos[id]) {
+            this._infos[id].cmdCount = 0;
+            this._infos[id].cmdTime = new Date().getTime();
+            this._infos[id].cooldownTime = -1;
+            this._infos[id].failedTimes = 0;
+        }
+    }
 }

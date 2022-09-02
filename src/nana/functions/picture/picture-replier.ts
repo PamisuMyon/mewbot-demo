@@ -1,7 +1,8 @@
 import { logger, LogLevel, Message } from "mewbot";
 import got from "got";
-import { MatryoshkaReplier, TestInfo, IBot, ReplyResult, Util, FileUtil, NetUtil, Replier, TestParams, FullConfidence, NoConfidence, Replied, MesageReplyMode } from "../../../bot/index.js";
+import { MatryoshkaReplier, TestInfo, IBot, ReplyResult, Util, FileUtil, NetUtil, Replier, TestParams, FullConfidence, NoConfidence, Replied, MesageReplyMode, Spam } from "../../../bot/index.js";
 import { Pxkore, PxkoreOptions } from "./pxkore.js";
+import { ServerImage } from "../../models/server-image.js";
 
 export class PictureReplier extends MatryoshkaReplier {
     
@@ -30,6 +31,12 @@ abstract class PictureSubReplier extends Replier {
     protected abstract _downloadingHint: string;
     protected abstract _downloadErrorHint: string;
     protected abstract _sendErrorHint: string;
+    protected _temporarySpam!: Spam;
+
+    override async init(bot: IBot) {
+        await super.init(bot);
+        this._temporarySpam = new Spam(0, 1, 5000);
+    }
 
     override async test(msg: Message, options: TestParams): Promise<TestInfo> {
         if (!msg.content) return NoConfidence;
@@ -41,7 +48,13 @@ abstract class PictureSubReplier extends Replier {
     }
 
     override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
+        if (!this._temporarySpam.check(msg.author_id).pass) {
+            return Replied;
+        }
+
         const hint = await bot.replyText(msg, this._downloadingHint);
+        this._temporarySpam.record(msg.author_id);
+
         const file = await Util.randomItem(this._downloadFuncs)();
         let error;
         if (file) {
@@ -62,6 +75,7 @@ abstract class PictureSubReplier extends Replier {
         if (error) {
             await bot.replyText(msg, error);
         }
+        this._temporarySpam.reset(msg.author_id);
         return Replied;
     }
 
@@ -163,6 +177,12 @@ class SetuSubReplier extends Replier {
     protected _downloadingHint = '正在检索猫猫数据库，请博士耐心等待...';
     protected _downloadErrorHint = '图片被猫猫吞噬了，请博士稍后再试。';
     protected _sendErrorHint = '图片发送过程中发生致命错误，您的开水壶已被炸毁。';
+    protected _temporarySpam!: Spam;
+
+    override async init(bot: IBot) {
+        await super.init(bot);
+        this._temporarySpam = new Spam(0, 1, 5000);
+    }
 
     override async test(msg: Message, options: TestParams): Promise<TestInfo> {
         if (!msg.content) return NoConfidence;
@@ -174,6 +194,10 @@ class SetuSubReplier extends Replier {
     }
 
     override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
+        if (!this._temporarySpam.check(msg.author_id).pass) {
+            return Replied;
+        }
+
         const config = this.getConfig(bot, msg.topic_id);
         const options: PxkoreOptions = {
             clientId: msg._isDirect? 'mew/' + msg.author_id : 'mew/public',
@@ -217,8 +241,8 @@ class SetuSubReplier extends Replier {
         const result = await Pxkore.request();
         let error;
         if (result) {
-            const image = await bot.replyImage(msg, result.path);
-            if (!image.data || !image.data.id) {
+            const imageMsg = await bot.replyImageWithCache(msg, result.path, ServerImage);
+            if (!imageMsg.data || !imageMsg.data.id) {
                 error = this._sendErrorHint;
             }
         } else {

@@ -1,4 +1,6 @@
-export class Util {
+import { Util as LibUtils } from "mewbot/dist/commons/utils";
+
+export class Util extends LibUtils {
 
     static randomFloat(min: number, max: number) {
         return Math.random() * (max - min) + min;

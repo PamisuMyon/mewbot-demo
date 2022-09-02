@@ -1,4 +1,4 @@
-import { Message, MewClient, OutgoingMessage, Result } from "mewbot";
+import { MediaImageInfo, Message, MewClient, OutgoingMessage, Result } from "mewbot";
 import { BotConfig, MesageReplyMode } from "./config.js";
 import { Replier, ReplierPickFunction } from "./replier.js";
 import { IBotStorage } from "./storage/istorage.js";
@@ -73,6 +73,8 @@ export interface IBot {
      * @param messageReplyMode 回复模式，默认使用配置值
      */
     replyImage(to: Message, imageFile: string, messageReplyMode?: MesageReplyMode): Promise<Result<Message>>;
+
+    replyImageWithCache(to: Message, imageFile: string, dao: IServerImageDao, messageReplyMode?: MesageReplyMode): Promise<Result<Message>>
     
 }
 
@@ -94,4 +96,18 @@ export interface InitOptions {
      * 内置实现参照 {@link Replier.pick01}（默认）, {@link Replier.pick} 
      */
     replierPickFunction?: ReplierPickFunction;
+}
+
+export interface ServerImageInfo {
+    fileName: string;
+    info: MediaImageInfo;
+}
+
+export interface IServerImageDao {
+
+    findByFileName(fileName: string): Promise<ServerImageInfo | null>
+
+    deleteByFileName(fileName: string): Promise<any>;
+
+    insertOne(serverImage: ServerImageInfo): Promise<any>;
 }

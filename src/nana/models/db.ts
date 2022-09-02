@@ -40,6 +40,10 @@ export class Col<TSchema extends Document = Document> {
         return this.col.insertMany(docs as OptionalUnlessRequiredId<TSchema>[]);
     }
 
+    updateOne(filter: Filter<TSchema>, doc: TSchema) {
+        return this.col.updateOne(filter, { $set: doc }, { upsert: false });
+    }
+
     upsertOne(filter: Filter<TSchema>, doc: TSchema) {
         return this.col.updateOne(filter, { $set: doc }, { upsert: true });
     }

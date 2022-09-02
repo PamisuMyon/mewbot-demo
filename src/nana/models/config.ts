@@ -48,8 +48,17 @@ export const defaultNanaBotConfig: Required<NanaBotConfig> = {
     topics: {
         // 在 不是机器人据点 的 🍄 话题（节点）中，配置功能
         "219353468583456768": {
+            id: "219353468583456768",
             name: "🍄",
-            repliers: { all: {} }
+            repliers: { 
+                all: {},
+                schedule: {
+                    birthday: true,
+                    morning: false,
+                    noon: false,
+                    night: false,
+                }
+            }
         },
     },
     // 提示文本

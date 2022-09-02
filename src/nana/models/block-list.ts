@@ -5,7 +5,6 @@ export interface IBlockedUser {
     username: string,
     name: string,
     isCursed: boolean,
-    createdAt: Date,
     updatedAt: Date,
 }
 

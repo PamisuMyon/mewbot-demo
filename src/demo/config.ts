@@ -26,6 +26,7 @@ export const demoBotConfig: Required<BotConfig> = {
     topics: {
         // 在 不是机器人据点 的 🐱 话题（节点）中，配置掷骰子、帮助等功能
         "100554577309229056": {
+            id: '100554577309229056',
             name: "🐱",
             // `key`对应Replier.type，为`all`时表示启用所有回复器
             repliers: {
@@ -39,6 +40,7 @@ export const demoBotConfig: Required<BotConfig> = {
         },
         // 在 不是机器人据点 的 🍄 话题（节点）中，配置所有功能
         "219353468583456768": {
+            id: '219353468583456768',
             name: "🍄",
             repliers: {
                 chat: {},
@@ -60,6 +62,7 @@ export const demoBotConfig: Required<BotConfig> = {
         },
         // 在 🦴据点 的 🦴 话题（节点）中，配置所有功能
         "222154400563036161": {
+            id: '222154400563036161',
             name: "🦴",
             repliers: {
                 all: {}
@@ -83,8 +86,9 @@ export const demoBotConfig: Required<BotConfig> = {
 };
 
 export const defaultTopicConfig: TopicConfig = {
+    id: '',
     name: '',
     repliers: {
         all: {}
-    }
+    },
 };

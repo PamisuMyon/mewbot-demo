@@ -84,7 +84,7 @@ export abstract class Replier {
      * 
      * @param bot bot
      */
-    init(bot: IBot) {
+    async init(bot: IBot) {
         const config = bot.config;
         // 初始化每个话题的Spam配置
         for (const key in config.topics) {
