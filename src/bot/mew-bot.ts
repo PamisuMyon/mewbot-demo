@@ -1,4 +1,4 @@
-import { Constants, logger, Message, MewClient, OutgoingMessage, User } from "mewbot";
+import { Constants, logger, MediaImageInfo, Message, MewClient, OutgoingMessage, Result, User } from "mewbot";
 import { Defender } from "./defender.js";
 import { BotConfig, MesageReplyMode } from "./config.js";
 import { IBot, InitOptions, IServerImageDao } from "./ibot.js";
@@ -364,6 +364,25 @@ export class MewBot implements IBot {
 
     async replyImageWithCache(to: Message, imageFile: string, dao: IServerImageDao, messageReplyMode?: MesageReplyMode) {
         logger.debug(`To: ${to.content}  Reply Image With Cache: ${imageFile}`);
+        const result = await this.handleImageWithCache(imageFile, dao);
+        if (result.data) {
+            return await this.reply(to, { media: [result.data.id] }, messageReplyMode);
+        } else {
+            return { error: result.error };
+        }
+    }
+
+    async sendImageWithCache(topic_id: string, imageFile: string, dao: IServerImageDao) {
+        logger.debug(`To: ${topic_id}  Send Image With Cache: ${imageFile}`);
+        const result = await this.handleImageWithCache(imageFile, dao);
+        if (result.data) {
+            return await this.client.sendMessage(topic_id, { media: [result.data.id] });
+        } else {
+            return { error: result.error };
+        }
+    }
+
+    async handleImageWithCache(imageFile: string, dao: IServerImageDao): Promise<Result<MediaImageInfo>> {
         const serverImage = await dao.findByFileName(imageFile);
         let info;
         if (serverImage && serverImage.info) {
@@ -386,7 +405,7 @@ export class MewBot implements IBot {
                 return { error: result.error };
             }
         }
-        return await this.reply(to, { media: [info.id] }, messageReplyMode);
+        return { data: info };
     }
 
 }

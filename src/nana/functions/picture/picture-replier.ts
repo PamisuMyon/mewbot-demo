@@ -9,9 +9,9 @@ export class PictureReplier extends MatryoshkaReplier {
     override type = 'picture';
     protected override _pickFunc = Replier.pick01;
     protected override _children = [
-        new KittySubReplier(),
-        new DogeSubReplier(),
-        new SetuSubReplier(),
+        new KittyReplier(),
+        new DogeReplier(),
+        new SetuReplier(),
     ];
 
     override getCooldownHint(remainTime?: number) {
@@ -81,9 +81,9 @@ abstract class PictureSubReplier extends Replier {
 
 }
 
-class KittySubReplier extends PictureSubReplier {
+class KittyReplier extends PictureSubReplier {
 
-    type = 'picture/kitty';
+    type = 'picture';
 
     protected _regexes = [
         /来(点|电|份|张)猫(猫|图)/,
@@ -132,9 +132,9 @@ class KittySubReplier extends PictureSubReplier {
 
 }
 
-class DogeSubReplier extends PictureSubReplier {
+class DogeReplier extends PictureSubReplier {
 
-    type = 'picture/doge';
+    type = 'picture';
 
     protected _regexes = [ 
         /来(点|电|份|张)狗(狗|图)/,
@@ -165,14 +165,14 @@ class DogeSubReplier extends PictureSubReplier {
 
 }
 
-class SetuSubReplier extends Replier {
+class SetuReplier extends Replier {
 
-    type = 'picture/setu';
+    type = 'picture';
     
     protected _timeout = 8000;
     protected _regexes = [ 
-        /来(点|电|份|张)(涩|瑟|色|美|帅)?图(片|图)?(.*)/,
-        /來(點|電|份|張)(澀|瑟|色|美|帥)?圖(片|圖)?(.*)/
+        /来(点|电|份|张)(涩|瑟|色|美|帅)?图(片|图)? *　*(.*)/,
+        /來(點|電|份|張)(澀|瑟|色|美|帥)?圖(片|圖)? *　*(.*)/
     ];
     protected _downloadingHint = '正在检索猫猫数据库，请博士耐心等待...';
     protected _downloadErrorHint = '图片被猫猫吞噬了，请博士稍后再试。';

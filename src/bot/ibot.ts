@@ -75,6 +75,8 @@ export interface IBot {
     replyImage(to: Message, imageFile: string, messageReplyMode?: MesageReplyMode): Promise<Result<Message>>;
 
     replyImageWithCache(to: Message, imageFile: string, dao: IServerImageDao, messageReplyMode?: MesageReplyMode): Promise<Result<Message>>
+
+    sendImageWithCache(topic_id: string, imageFile: string, dao: IServerImageDao): Promise<Result<Message>>
     
 }
 

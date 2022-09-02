@@ -94,7 +94,7 @@ export class HandbookCol extends Col<IHandbook> {
     async getBirthDayMessageSimple(date: Date) {
         const ops = await this.findByBirthday(date.getMonth() + 1, date.getDate());
         if (!ops || ops.length == 0) {
-            return;
+            return '';
         }
         let msg = '';
         for (let i = 0; i < ops.length; i++) {
