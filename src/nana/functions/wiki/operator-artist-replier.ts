@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { Handbook } from "../../models/ak/handbook.js";
 
 export class OperatorArtistReplier extends Replier {
@@ -15,9 +16,9 @@ export class OperatorArtistReplier extends Replier {
         for (const regex of this._regexes) {
             const r = regex.exec(msg.content);
             if (r) {
-                const info = await Handbook.findByArtist(msg.content);
-                if (info)
-                    return { confidence: 1, data: info };
+                const info = await Handbook.findOne({ name: r[1] });
+                if (info && info.drawName)
+                    return { confidence: 1, data: '🎨' + info.drawName };
             }
         }
         return NoConfidence;
@@ -25,6 +26,7 @@ export class OperatorArtistReplier extends Replier {
 
     async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         await bot.replyText(msg, test.data);
+        await ActionLog.log(this.type, msg, test.data);
         return Replied;
     }
 

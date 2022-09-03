@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyFailed, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { IRoguelikeItem, RoguelikeItem } from "../../models/ak/roguelike-item.js";
 
 export class RoguelikeItemReplier extends Replier {
@@ -48,6 +49,7 @@ export class RoguelikeItemReplier extends Replier {
         }
         if (reply) {
             await bot.replyText(msg, reply);
+            await ActionLog.log(this.type, msg, reply);
             return Replied;
         }
         return ReplyFailed;

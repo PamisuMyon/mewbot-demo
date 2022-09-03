@@ -1,6 +1,7 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
 import { Util } from "../../commons/utils.js";
+import { ActionLog } from "../../models/action-log.js";
 import { Handbook } from "../../models/ak/handbook.js";
 import { Sentence } from "../../models/sentence.js";
 
@@ -68,6 +69,7 @@ export class BirthdayOperatorReplier extends Replier {
 
     async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         await bot.replyText(msg, test.data);
+        await ActionLog.log(this.type, msg, test.data);
         return Replied;
     }
 

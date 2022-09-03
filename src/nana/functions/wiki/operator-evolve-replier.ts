@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyFailed, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { AkMisc } from "../../models/ak/ak-misc.js";
 import { Character, ICharacter } from "../../models/ak/character.js";
 import { Item } from "../../models/ak/item.js";
@@ -60,6 +61,7 @@ export class OperatorEvolveReplier extends Replier {
         
         if (reply) {
             await bot.replyText(msg, reply);
+            await ActionLog.log(this.type, msg, reply);
             return Replied;
         }
         return ReplyFailed;

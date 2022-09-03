@@ -1,6 +1,7 @@
 import { Message } from "mewbot";
-import { FullConfidence, HalfConfidence, IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { FullConfidence, IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
 import { Util } from "../../commons/utils.js";
+import { ActionLog } from "../../models/action-log.js";
 import { MiscConfig } from "../../models/config.js";
 import { Sentence } from "../../models/sentence.js";
 
@@ -15,8 +16,10 @@ export class DiceReplier extends Replier {
     protected _regexLax = /((\d+) ?\+ ?)?((\d*) )?(\d*)d(\d+)( ?\+ ?(\d+))?=?/i;
     protected _ignores: RegExp[] = [];
 
-    async init() {
+    async init(bot: IBot) {
+        await super.init(bot);
         const ignores = await MiscConfig.findOneByName<string[]>('diceIgnores');
+        this._ignores = [];
         for (const item of ignores) {
             this._ignores.push(new RegExp(item, 'i'));
         }
@@ -58,6 +61,7 @@ export class DiceReplier extends Replier {
         }
 
         await bot.replyText(msg, reply);
+        ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 

@@ -36,7 +36,7 @@ export class GachaInfoCol extends Col<GachaInfo> {
         }
     }
     
-    async updateOne(id: string, remain: number, limit = -1) {
+    async updateRemain(id: string, remain: number, limit = -1) {
         const update = limit == -1 ? { $set: { rollRemain: remain } } : { $set: { rollRemain: remain, rollLimit: limit } };
         await this.col.updateOne({ id }, update, { upsert: true });
     }

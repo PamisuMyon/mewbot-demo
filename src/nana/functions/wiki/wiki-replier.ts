@@ -1,6 +1,7 @@
 import { MatryoshkaReplier, Replier } from "../../../bot/index.js";
 import { ArtistOperatorReplier } from "./artist-operator-replier.js";
 import { BirthdayOperatorReplier } from "./birthday-operater-replier.js";
+import { CvOperatorReplier } from "./cv-operator-replier.js";
 import { EnemyReplier } from "./enemy-replier.js";
 import { ItemReplier } from "./item-replier.js";
 import { OperatorArtistReplier } from "./operator-artist-replier.js";
@@ -30,6 +31,7 @@ export class WikiReplier extends MatryoshkaReplier {
         new OperatorBirthplaceReplier(),
         // No Regex
         new ArtistOperatorReplier(),
+        new CvOperatorReplier(),
         new OperatorReplier(false),
         new EnemyReplier(false),
         new ItemReplier(false),

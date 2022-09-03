@@ -1,6 +1,7 @@
 import { Message } from "mewbot";
 import { FullConfidence, IBot, NoConfidence, Replied, Replier, ReplyResult, Spam, TestInfo, TestParams } from "../../bot/index.js";
 import { Util } from "../commons/utils.js";
+import { ActionLog } from "../models/action-log.js";
 import { NanaBotConfig } from "../models/config.js";
 import { Sentence } from "../models/sentence.js";
 
@@ -20,7 +21,10 @@ export class SilenceReplier extends Replier {
     override async init(bot: IBot) {
         await super.init(bot);
         this._silenceDuration = (bot.storage.config as NanaBotConfig).silenceDuration;
-        this._silenceSpam = new Spam(0, 1, this._silenceDuration);
+        if (!this._silenceSpam)
+            this._silenceSpam = new Spam(0, 1, this._silenceDuration);
+        else 
+            this._silenceSpam.init(0, 1, this._silenceDuration);
     }
 
     async test(msg: Message, options: TestParams): Promise<TestInfo> {
@@ -44,6 +48,9 @@ export class SilenceReplier extends Replier {
             let reply = Util.getTimeCounterText(this._silenceDuration / 1000);
             reply = Util.stringFormat(Sentence.getRandomOne('silence')!, reply);
             await bot.replyText(msg, reply);
+            await ActionLog.log(this.type, msg, reply);
+        } else {
+            await ActionLog.log(this.type, msg);
         }
         return Replied;
     }

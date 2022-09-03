@@ -3,6 +3,7 @@ import got from "got";
 import { MatryoshkaReplier, TestInfo, IBot, ReplyResult, Util, FileUtil, NetUtil, Replier, TestParams, FullConfidence, NoConfidence, Replied, MesageReplyMode, Spam } from "../../../bot/index.js";
 import { Pxkore, PxkoreOptions } from "./pxkore.js";
 import { ServerImage } from "../../models/server-image.js";
+import { ActionLog } from "../../models/action-log.js";
 
 export class PictureReplier extends MatryoshkaReplier {
     
@@ -35,7 +36,8 @@ abstract class PictureSubReplier extends Replier {
 
     override async init(bot: IBot) {
         await super.init(bot);
-        this._temporarySpam = new Spam(0, 1, 5000);
+        if (!this._temporarySpam)
+            this._temporarySpam = new Spam(0, 1, 5000);
     }
 
     override async test(msg: Message, options: TestParams): Promise<TestInfo> {
@@ -58,13 +60,14 @@ abstract class PictureSubReplier extends Replier {
         const file = await Util.randomItem(this._downloadFuncs)();
         let error;
         if (file) {
-            const image = await bot.replyImage(msg, file);
-            if (!image.data || !image.data.id) {
+            const imageMsg = await bot.replyImage(msg, file);
+            if (!imageMsg.data || !imageMsg.data.id) {
                 error = this._sendErrorHint;
             } else {
                 // 删除缓存文件
                 await FileUtil.delete(file);
             }
+            await ActionLog.log(this.type, msg, imageMsg);
         } else {
             error = this._downloadErrorHint;
         }
@@ -74,6 +77,7 @@ abstract class PictureSubReplier extends Replier {
         }
         if (error) {
             await bot.replyText(msg, error);
+            await ActionLog.log(this.type, msg, error);
         }
         this._temporarySpam.reset(msg.author_id);
         return Replied;
@@ -181,7 +185,8 @@ class SetuReplier extends Replier {
 
     override async init(bot: IBot) {
         await super.init(bot);
-        this._temporarySpam = new Spam(0, 1, 5000);
+        if (!this._temporarySpam)
+            this._temporarySpam = new Spam(0, 1, 5000);
     }
 
     override async test(msg: Message, options: TestParams): Promise<TestInfo> {
@@ -197,6 +202,7 @@ class SetuReplier extends Replier {
         if (!this._temporarySpam.check(msg.author_id).pass) {
             return Replied;
         }
+        this._temporarySpam.record(msg.author_id);
 
         const config = this.getConfig(bot, msg.topic_id);
         const options: PxkoreOptions = {
@@ -238,19 +244,20 @@ class SetuReplier extends Replier {
         }
         
         const hint = await bot.replyText(msg, this._downloadingHint);
-        const result = await Pxkore.request();
+        const illust = await Pxkore.request();
         let error;
-        if (result) {
-            const imageMsg = await bot.replyImageWithCache(msg, result.path, ServerImage);
+        if (illust) {
+            const imageMsg = await bot.replyImageWithCache(msg, illust.path, ServerImage);
             if (!imageMsg.data || !imageMsg.data.id) {
                 error = this._sendErrorHint;
             }
+            await ActionLog.log(this.type, msg, imageMsg, illust.data);
         } else {
             error = this._downloadErrorHint;
         }
         await Util.sleep(100);
-        if (result && result.info) {
-            await bot.replyText(msg, result.info, MesageReplyMode.None, false);
+        if (illust && illust.info) {
+            await bot.replyText(msg, illust.info, MesageReplyMode.None, false);
             await Util.sleep(100);
         }
         if (hint.data) {
@@ -258,7 +265,9 @@ class SetuReplier extends Replier {
         }
         if (error) {
             await bot.replyText(msg, error);
+            await ActionLog.log(this.type, msg, error);
         }
+        this._temporarySpam.reset(msg.author_id);
         return Replied;
     }
 

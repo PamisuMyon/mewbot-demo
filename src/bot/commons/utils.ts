@@ -1,4 +1,4 @@
-import { Util as LibUtils } from "mewbot/dist/commons/utils";
+import { Util as LibUtils } from "mewbot/dist/commons/utils.js";
 
 export class Util extends LibUtils {
 

@@ -3,8 +3,8 @@ import * as schedule from 'node-schedule';
 import { IBot } from "../../bot/index.js";
 import { Util } from '../commons/utils.js';
 import { Pxkore, PxkoreOptions } from '../functions/picture/pxkore.js';
-import { Handbook } from '../models/ak/handbook';
-import { Sentence } from '../models/sentence';
+import { Handbook } from '../models/ak/handbook.js';
+import { Sentence } from '../models/sentence.js';
 import { ServerImage } from '../models/server-image.js';
 
 

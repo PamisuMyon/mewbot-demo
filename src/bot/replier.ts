@@ -93,8 +93,12 @@ export abstract class Replier {
             const spamConfig = config.topics[key].repliers[this.type].spam;
             if (!spamConfig)
                 continue;
-            const spam = new Spam(spamConfig.interval, spamConfig.threshold, spamConfig.cooldown);
-            this._spams[key] = spam;
+
+            if (this._spams[key]) {
+                this._spams[key].init(spamConfig.interval, spamConfig.threshold, spamConfig.cooldown);
+            } else {
+                this._spams[key] = new Spam(spamConfig.interval, spamConfig.threshold, spamConfig.cooldown);
+            }
         }
     }
 
@@ -241,6 +245,13 @@ export abstract class MatryoshkaReplier extends Replier {
 
     protected _children!: Array<Replier>;
     protected _pickFunc = Replier.pick;
+
+    override async init(bot: IBot): Promise<void> {
+        await super.init(bot);
+        for (const child of this._children) {
+            await child.init(bot);
+        }
+    }
 
     override async test(msg: Message, options: TestParams) {
         if (!msg.content) {

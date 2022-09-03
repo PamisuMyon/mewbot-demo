@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { Character, ICharacter } from "../../models/ak/character.js";
 import { HandbookTeam } from "../../models/ak/handbook-team.js";
 
@@ -48,7 +49,8 @@ export class OperatorTeamReplier extends Replier {
         if (!reply)
             reply = `没有查询到所属势力的相关记录呢。`;
 
-        await bot.replyText(msg, test.data);
+        await bot.replyText(msg, reply);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 

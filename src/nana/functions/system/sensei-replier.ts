@@ -1,6 +1,7 @@
 import got from "got";
 import { logger, LogLevel, Message } from "mewbot";
 import { IBot, MatryoshkaReplier, Replied, Replier, ReplyResult, TestInfo } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { Sentence } from "../../models/sentence.js";
 import { UserRole } from "../../models/user.js";
 import { RoleCheckSubReplier } from "./role-check.js";
@@ -78,6 +79,7 @@ class LearnReplier extends SenseiSubReplier {
             reply = '学习失败😿，请稍后再试或联系维护员。';
         }
         await bot.replyText(msg, reply);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 

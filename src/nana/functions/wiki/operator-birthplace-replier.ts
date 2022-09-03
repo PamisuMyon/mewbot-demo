@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { Handbook, IHandbook } from "../../models/ak/handbook.js";
 
 export class OperatorBirthplaceReplier extends Replier {
@@ -35,6 +36,7 @@ export class OperatorBirthplaceReplier extends Replier {
         }
 
         await bot.replyText(msg, reply);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 

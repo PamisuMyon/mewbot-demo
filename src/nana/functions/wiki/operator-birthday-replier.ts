@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { Handbook } from "../../models/ak/handbook.js";
 
 export class OperatorBirthdayReplier extends Replier {
@@ -16,7 +17,7 @@ export class OperatorBirthdayReplier extends Replier {
             if (r) {
                 const info = await Handbook.findOne({ name: r[1] });
                 if (info && info.birthday)
-                    return { confidence: 1, data: info.birthday };
+                    return { confidence: 1, data: '🎂' + info.birthday };
             }
         }
         return NoConfidence;
@@ -24,6 +25,7 @@ export class OperatorBirthdayReplier extends Replier {
 
     async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         await bot.replyText(msg, test.data);
+        await ActionLog.log(this.type, msg, test.data);
         return Replied;
     }
 

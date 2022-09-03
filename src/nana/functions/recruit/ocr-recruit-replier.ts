@@ -1,6 +1,7 @@
 import { Message } from "mewbot";
 import { FullConfidence, IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
 import { BaiduOcr } from "../../ai/baidu-ocr.js";
+import { ActionLog } from "../../models/action-log.js";
 import { Sentence } from "../../models/sentence.js";
 import { RecruitInst } from "./recruit.js";
 
@@ -60,6 +61,7 @@ export class OcrRecruitReplier extends Replier {
         reply += RecruitInst.beautifyRecruitResults(reuslts);
 
         await bot.replyText(msg, reply);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 

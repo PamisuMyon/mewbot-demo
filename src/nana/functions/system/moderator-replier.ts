@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { IBot, MatryoshkaReplier, Replied, Replier, ReplyResult, TestInfo, TopicConfig } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { MiscConfig } from "../../models/config.js";
 import { UserRole } from "../../models/user.js";
 import { RoleCheckSubReplier } from "./role-check.js";
@@ -74,6 +75,7 @@ class EnterTopicReplier extends ModeratorSubReplier {
             }
         }
         await bot.replyText(msg, reply);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 
@@ -113,6 +115,7 @@ class ExitTopicReplier extends ModeratorSubReplier {
             reply = `并没有进驻过这个节点呢\n名称:${topic.name} \nID:${topic.id}`;
         }
         await bot.replyText(msg, reply);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 

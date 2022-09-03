@@ -1,5 +1,5 @@
 import { MewBot } from "../bot/index.js";
-import { ChatReplier } from "../demo/repliers/chat-replier.js";
+import { ChatReplier } from "./functions/chat/chat-replier.js";
 import { DiceReplier } from "./functions/dice/dice-replier.js";
 import { GachaReplier } from "./functions/gacha/gacha-replier.js";
 import { HelpReplier } from "./functions/help-replier.js";

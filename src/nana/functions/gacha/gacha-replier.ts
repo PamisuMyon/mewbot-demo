@@ -1,6 +1,7 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyResult, Spam, TestInfo, TestParams } from "../../../bot/index.js";
 import { Util } from "../../commons/utils.js";
+import { ActionLog } from "../../models/action-log.js";
 import { GachaInfo } from "../../models/ak/gacha-info.js";
 import { GachaInst } from "./gacha.js";
 
@@ -34,11 +35,15 @@ export class GachaReplier extends Replier {
             const check = this.checkSpam(msg.topic_id, msg.topic_id);
             if (!check.pass) {
                 const reply = `指令冷却中(${Util.getTimeCounterText(check.remain! / 1000)})`;
-                const result = await bot.replyText(msg, reply);
-                if (result.data) {
-                    bot.client.deleteMessage(result.data.id);
-                }
-                return Replied;
+                const hintMsg = await bot.replyText(msg, reply);
+                await ActionLog.log(this.type, msg, reply);
+                if (hintMsg.data) {
+                    return {
+                        success: true,
+                        recall: { messageId: hintMsg.data.id, delay: 2000 }
+                    };
+                } else
+                    return Replied;
             }
         }
 
@@ -74,6 +79,7 @@ export class GachaReplier extends Replier {
         }
         
         await bot.replyText(msg, reply);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 

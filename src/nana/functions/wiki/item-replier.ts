@@ -1,6 +1,7 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyFailed, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
 import { Util } from "../../commons/utils.js";
+import { ActionLog } from "../../models/action-log.js";
 import { IItem, Item } from "../../models/ak/item.js";
 import { WorkshopFormula } from "../../models/ak/workshop-formula.js";
 
@@ -62,6 +63,7 @@ export class ItemReplier extends Replier {
 
         if (reply) {
             await bot.replyText(msg, reply);
+            await ActionLog.log(this.type, msg, reply);
             return Replied;
         }
         return ReplyFailed;

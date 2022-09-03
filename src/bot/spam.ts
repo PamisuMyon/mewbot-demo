@@ -42,9 +42,9 @@ export interface CheckResult {
  */
 export class Spam {
 
-    protected _interval: number;
-    protected _threshold: number;
-    protected _cooldown: number;
+    protected _interval!: number;
+    protected _threshold!: number;
+    protected _cooldown!: number;
     protected _infos: { [id: string]: SpamInfo };
 
     /**
@@ -54,6 +54,10 @@ export class Spam {
      */
     constructor(interval?: number, threshold?: number, cooldown?: number) {
         this._infos = {};
+        this.init(interval, threshold, cooldown);
+    }
+
+    init(interval?: number, threshold?: number, cooldown?: number) {
         this._interval = interval || 45000;
         this._threshold = threshold || 3;
         this._cooldown = cooldown || 60000;

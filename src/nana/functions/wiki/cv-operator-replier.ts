@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { Handbook } from "../../models/ak/handbook.js";
 
 export class CvOperatorReplier extends Replier {
@@ -19,7 +20,7 @@ export class CvOperatorReplier extends Replier {
                     }
                 }
                 if (reply) {
-                    reply = `${msg.content}配音的干员：` + reply;
+                    reply = `🎙${msg.content}配音的干员：` + reply;
                     return { confidence: 1, data: reply };
                 }
             }
@@ -29,6 +30,7 @@ export class CvOperatorReplier extends Replier {
 
     async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         await bot.replyText(msg, test.data);
+        await ActionLog.log(this.type, msg, test.data);
         return Replied;
     }
 

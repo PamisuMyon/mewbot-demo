@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { Replier, TestParams, TestInfo, NoConfidence, FullConfidence, IBot, ReplyResult, Replied, Util, ReplyFailed } from "../../../bot/index.js";
+import { ActionLog } from "../../models/action-log.js";
 import { ConversationPriority } from "../../models/conversation.js";
 import { Sentence } from "../../models/sentence.js";
 import { Chatter } from "./chatter.js";
@@ -20,7 +21,9 @@ export class ChatReplier extends Replier {
             && msg.content != null
             && (!msg.content || !msg.content.replace('　', ''))) {
             // 群聊无文字消息
-            bot.replyText(msg, Sentence.getRandomOne('atOnly')!);
+            const reply = Sentence.getRandomOne('atOnly')!;
+            await bot.replyText(msg, reply);
+            await ActionLog.log(this.type, msg, reply);
             return Replied;
         }
 
@@ -37,6 +40,7 @@ export class ChatReplier extends Replier {
         const convReply = this._chatter.getConversationReply(msg.content);
         if (convReply && convReply.priority == ConversationPriority.High) {
             await bot.replyText(msg, convReply.content);
+            await ActionLog.log(this.type, msg, convReply.content);
             return Replied;
         }
 
@@ -64,6 +68,7 @@ export class ChatReplier extends Replier {
         }
 
         await bot.replyText(msg, reply);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 

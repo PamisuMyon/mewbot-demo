@@ -1,5 +1,6 @@
 import { Message } from "mewbot";
 import { FullConfidence, IBot, NoConfidence, Replied, Replier, ReplyResult, TestInfo, TestParams } from "../../bot/index.js";
+import { ActionLog } from "../models/action-log.js";
 import { Sentence } from "../models/sentence.js";
 
 export class HelpReplier extends Replier {
@@ -15,12 +16,16 @@ export class HelpReplier extends Replier {
 
     override async reply(bot: IBot, msg: Message, test: TestInfo): Promise<ReplyResult> {
         if (!msg._isDirect && !await this.checkAvailable(bot, msg, false)) {
-            await bot.replyText(msg, Sentence.getRandomOne('helpHint')!);
+            const reply = Sentence.getRandomOne('helpHint')!;
+            await bot.replyText(msg, reply);
+            await ActionLog.log(this.type, msg, reply);
             return Replied;
         }
 
-        await bot.replyText(msg, Sentence.getRandomOne('help')!);
+        const reply = Sentence.getRandomOne('help')!;
+        await bot.replyText(msg, reply);
         await bot.replyThought(msg, Sentence.getRandomOne('helpThought')!);
+        await ActionLog.log(this.type, msg, reply);
         return Replied;
     }
 
