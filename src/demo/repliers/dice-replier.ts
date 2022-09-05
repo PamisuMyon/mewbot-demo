@@ -1,5 +1,5 @@
 import { Message } from "mewbot";
-import { Replier, IBot, ReplyResult, Util, TestInfo, TestParams, NoConfidence, Replied, FullConfidence } from "../../bot/index.js";
+import { Replier, IBot, ReplyResult, Util, TestInfo, TestParams, NoConfidence, Replied, FullConfidence } from "mewbot";
 
 /**
  * 骰娘的本职工作

@@ -41,7 +41,7 @@ Token与账号密码二选一，推荐使用Token。
 ### 运行
 
 ```sh-session
-npm run bot
+npm start
 ```
 
 您可以前往配置中的据点测试效果，如果使用默认配置，请前往[不是机器人](https://mew.fun/n/not_a_robot)据点的`🍄`节点进行测试。

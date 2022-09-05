@@ -1,8 +1,7 @@
 import { Message, logger, LogLevel } from 'mewbot';
 import * as readline from 'readline';
-import { MewBot, MesageReplyMode } from '../bot/index.js';
+import { MewBot, MesageReplyMode } from 'mewbot';
 import { ChatReplier } from './repliers/chat-replier.js';
-import { CrashReplier } from './repliers/crash-replier.js';
 import { DiceReplier } from './repliers/dice-replier.js';
 import { KudosReplier } from './repliers/kudos-replier.js';
 import { MewReplier } from './repliers/mew-replier.js';
@@ -15,7 +14,6 @@ class MockBot extends MewBot {
     protected override _repliers = [
         new DiceReplier(),
         new MewReplier(),
-        new CrashReplier(),
         new PictureReplier(),
         new KudosReplier(),
         new ChatReplier(),

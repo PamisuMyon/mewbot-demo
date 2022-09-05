@@ -1,4 +1,4 @@
-// 快速上手
+// MewClient快速上手
 
 import { logger, LogLevel, MewClient } from "mewbot";
 

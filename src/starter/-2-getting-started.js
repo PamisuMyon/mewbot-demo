@@ -1,4 +1,4 @@
-// 快速上手，接收并监听据点指定话题消息，回复指定内容的消息
+// MewClient快速上手，接收并监听据点指定话题消息，回复指定内容的消息
 
 import { logger, LogLevel, MewClient } from "mewbot";
 

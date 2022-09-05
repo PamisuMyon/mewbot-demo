@@ -1,4 +1,4 @@
-import { BotConfig, MesageReplyMode, TopicConfig, TopicsConfig } from "../bot/index.js";
+import { BotConfig, MesageReplyMode, TopicConfig, TopicsConfig } from "mewbot";
 
 
 export const demoBotConfig: Required<BotConfig> = {

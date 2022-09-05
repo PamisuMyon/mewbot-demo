@@ -1,5 +1,5 @@
 import { Message, Node } from "mewbot";
-import { MatryoshkaReplier,  TestInfo, IBot, ReplyResult, Replier, NoConfidence, Replied } from "../../bot/index.js";
+import { MatryoshkaReplier,  TestInfo, IBot, ReplyResult, Replier, NoConfidence, Replied } from "mewbot";
 
 export class MewReplier extends MatryoshkaReplier {
     override type = 'mew';

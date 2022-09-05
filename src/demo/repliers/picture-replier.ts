@@ -1,6 +1,6 @@
 import { logger, LogLevel, Message } from "mewbot";
 import got from "got";
-import { MatryoshkaReplier, TestInfo, IBot, ReplyResult, Util, FileUtil, NetUtil, Replier, TestParams, FullConfidence, NoConfidence, Replied } from "../../bot/index.js";
+import { MatryoshkaReplier, TestInfo, IBot, ReplyResult, Util, FileUtil, NetUtil, Replier, TestParams, FullConfidence, NoConfidence, Replied } from "mewbot";
 
 export class PictureReplier extends MatryoshkaReplier {
     

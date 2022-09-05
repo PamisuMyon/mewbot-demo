@@ -4,19 +4,14 @@
   "description": "Demo of mewbot",
   "type": "module",
   "scripts": {
-    "bot": "node dist/demo/app.js",
-    "mock": "node dist/demo/mock.js",
-    "nana": "node dist/nana/app.js",
-    "nanamock": "node dist/nana/mock.js"
+    "start": "node dist/demo/app.js",
+    "mock": "node dist/demo/mock.js"
   },
   "author": "Pamisu",
   "license": "MIT",
   "dependencies": {
-    "got": "^12.3.0",
-    "hpagent": "^1.0.0",
-    "mewbot": "^1.0.3",
-    "mongodb": "^4.8.1",
-    "node-schedule": "^2.1.0"
+    "got": "^12.2.0",
+    "mewbot": "^1.0.4"
   },
   "devDependencies": {
     "@types/node-schedule": "^2.1.0",
